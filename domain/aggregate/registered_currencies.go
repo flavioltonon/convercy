@@ -23,14 +23,16 @@ func (a *RegisteredCurrencies) ClientID() valueobject.ClientID {
 }
 
 func (a *RegisteredCurrencies) Currencies() []*entity.Currency {
+	if a == nil || a.currencies == nil {
+		return make([]*entity.Currency, 0)
+	}
+
 	return a.currencies
 }
 
 func (a *RegisteredCurrencies) RegisterCurrency(newCurrency *entity.Currency) error {
-	for _, registeredCurrency := range a.currencies {
-		if registeredCurrency.ID().Equal(newCurrency.ID()) || registeredCurrency.Code().Equal(newCurrency.Code()) {
-			return domain.ErrCurrencyAlreadyExists()
-		}
+	if a.HasCurrencyWithCode(newCurrency.Code()) {
+		return domain.ErrCurrencyAlreadyExists()
 	}
 
 	a.currencies = append(a.currencies, newCurrency)
