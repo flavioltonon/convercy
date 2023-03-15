@@ -1,0 +1,15 @@
+package valueobject
+
+import "convercy/domain"
+
+type ExchangeRates []ExchangeRate
+
+func (v ExchangeRates) FindByCode(code CurrencyCode) (ExchangeRate, error) {
+	for _, exchangeRate := range v {
+		if exchangeRate.unit.BaseCurrencyCode().Equal(code) {
+			return exchangeRate, nil
+		}
+	}
+
+	return ExchangeRate{}, domain.ErrExchangeRateNotFound()
+}
