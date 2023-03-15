@@ -236,3 +236,114 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_R
 		})
 	}
 }
+
+func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_UnregisterCurrency() {
+	type fields struct {
+		registeredCurrenciesRepository func() repositories.RegisteredCurrenciesRepository
+	}
+
+	type args struct {
+		request dto.UnregisterCurrencyRequest
+	}
+
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "When the input request.CurrencyID is not valid, an error should be returned",
+			fields: fields{
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					return repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+				},
+			},
+			args: args{
+				request: dto.UnregisterCurrencyRequest{
+					CurrencyID: "",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "When the search for registered currencies fails, an error should be returned",
+			fields: fields{
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+					mock.On("GetRegisteredCurrencies").Return(nil, domain.ErrRegisteredCurrenciesNotFound())
+					return mock
+				},
+			},
+			args: args{
+				request: dto.UnregisterCurrencyRequest{
+					CurrencyID: s.currencies.brl.currencyID.String(),
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "When the currency ID provided is not related to any registered currencies, an error should be returned",
+			fields: fields{
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+					mock.On("GetRegisteredCurrencies").Return(aggregate.NewRegisteredCurrencies(s.clientID, s.currencies.brl.currency), nil)
+					return mock
+				},
+			},
+			args: args{
+				request: dto.UnregisterCurrencyRequest{
+					CurrencyID: s.currencies.usd.currencyID.String(),
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "When the persistence of the updated registered currencies fail, an error should be returned",
+			fields: fields{
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					registeredCurrencies := aggregate.NewRegisteredCurrencies(s.clientID, s.currencies.brl.currency)
+					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+					mock.On("GetRegisteredCurrencies").Return(registeredCurrencies, nil)
+					mock.On("SaveRegisteredCurrencies", registeredCurrencies).Return(errors.New("some error"))
+					return mock
+				},
+			},
+			args: args{
+				request: dto.UnregisterCurrencyRequest{
+					CurrencyID: s.currencies.brl.currencyID.String(),
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "When everything works as intended and everything is valid, no errors should be returned",
+			fields: fields{
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					registeredCurrencies := aggregate.NewRegisteredCurrencies(s.clientID, s.currencies.brl.currency)
+					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+					mock.On("GetRegisteredCurrencies").Return(registeredCurrencies, nil)
+					mock.On("SaveRegisteredCurrencies", registeredCurrencies).Return(nil)
+					return mock
+				},
+			},
+			args: args{
+				request: dto.UnregisterCurrencyRequest{
+					CurrencyID: s.currencies.brl.currencyID.String(),
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			service := &CurrencyRegistrationService{
+				registeredCurrenciesRepository: tt.fields.registeredCurrenciesRepository(),
+			}
+			err := service.UnregisterCurrency(tt.args.request)
+			s.Equal(tt.wantErr, err != nil)
+		})
+	}
+}
+
