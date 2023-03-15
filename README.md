@@ -4,6 +4,7 @@ A currency conversion management API written in Go.
 
 ## Pre-requisites
 
+- golang@v1.18 or newer
 - docker-compose@v2.15.1
 
 ## Features
@@ -30,3 +31,13 @@ A currency conversion management API written in Go.
 ## Documentation
 
 The API complete specification can be found at docs/Convercy.postman_collection.json
+
+## Running tests
+
+### Unix-based Operational Systems
+
+> make tests
+
+### Other Operational Systems
+
+> go test -cover ./...
