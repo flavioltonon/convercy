@@ -22,6 +22,8 @@ type CurrencyRegistrationServiceTestSuite struct {
 
 	clientID valueobject.ClientID
 
+	currencyID valueobject.CurrencyID
+
 	currencies struct {
 		brl struct {
 			currencyID   valueobject.CurrencyID
