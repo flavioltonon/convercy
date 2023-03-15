@@ -10,7 +10,8 @@ import (
 	"time"
 
 	"convercy/application/config"
-	"convercy/application/http/controllers"
+	"convercy/application/http/controllers/backoffice"
+	"convercy/application/http/controllers/user"
 	"convercy/application/http/middleware"
 	applicationServices "convercy/application/services"
 	domainServices "convercy/domain/services"
@@ -74,18 +75,16 @@ func main() {
 			currencyExchangeRatesService,
 		)
 		currencyRegistrationApplicationService = applicationServices.NewCurrencyRegistrationService(currencyCodeValidationService, currenciesRepository)
-		currencyController                     = controllers.NewCurrencyController(
-			currencyConversionApplicationService,
-			currencyRegistrationApplicationService,
-		)
+		backofficeCurrencyController           = backoffice.NewCurrencyController(currencyRegistrationApplicationService)
+		userCurrencyController                 = user.NewCurrencyController(currencyConversionApplicationService)
 	)
 
 	// Setup router
 	router := mux.NewRouter()
-	router.HandleFunc("/api/convert/{currency_code}/{currency_amount}", currencyController.ConvertCurrency).Methods(http.MethodGet)
-	router.HandleFunc("/api/backoffice/currencies", currencyController.ListRegisteredCurrencies).Methods(http.MethodGet)
-	router.HandleFunc("/api/backoffice/currencies", currencyController.RegisterCurrency).Methods(http.MethodPost)
-	router.HandleFunc("/api/backoffice/currencies/{currency_id}", currencyController.UnregisterCurrency).Methods(http.MethodDelete)
+	router.HandleFunc("/api/convert/{currency_code}/{currency_amount}", userCurrencyController.ConvertCurrency).Methods(http.MethodGet)
+	router.HandleFunc("/api/backoffice/currencies", backofficeCurrencyController.ListRegisteredCurrencies).Methods(http.MethodGet)
+	router.HandleFunc("/api/backoffice/currencies", backofficeCurrencyController.RegisterCurrency).Methods(http.MethodPost)
+	router.HandleFunc("/api/backoffice/currencies/{currency_id}", backofficeCurrencyController.UnregisterCurrency).Methods(http.MethodDelete)
 	router.Use(middleware.Log(logger))
 
 	server := &http.Server{
