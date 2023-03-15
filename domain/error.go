@@ -80,6 +80,12 @@ func ErrUnexpectedExchangeRateBaseCurrencyCode(expected, actual string) error {
 	}
 }
 
+func ErrInvalidCurrencyID(cause error) error {
+	return ErrValidationFailure{
+		message: fmt.Sprintf("invalid currency ID: %v", cause),
+	}
+}
+
 func ErrInvalidCurrencyAmount(cause error) error {
 	return ErrValidationFailure{
 		message: fmt.Sprintf("invalid currency amount: %v", cause),

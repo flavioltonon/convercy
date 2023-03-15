@@ -1,6 +1,9 @@
 package valueobject
 
 import (
+	"convercy/domain"
+
+	ozzo "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/google/uuid"
 )
@@ -36,5 +39,11 @@ func (v CurrencyID) String() string {
 }
 
 func (v CurrencyID) Validate() error {
-	return is.UUIDv4.Validate(v.String())
+	if err := ozzo.ValidateStruct(&v,
+		ozzo.Field(&v.value, ozzo.Required, is.UUIDv4),
+	); err != nil {
+		return domain.ErrInvalidCurrencyID(err)
+	}
+
+	return nil
 }
