@@ -1,4 +1,4 @@
-FROM golang:1.20.1-alpine3.17 as builder
+FROM golang:1.18-alpine3.17 as builder
 
 RUN apk update && apk add make
 
@@ -8,7 +8,7 @@ COPY . .
 
 RUN make build
 
-FROM alpine:3.17
+FROM scratch
 
 COPY --from=builder /app/build/bin /bin
 COPY --from=builder /app/config.yaml /config.yaml
