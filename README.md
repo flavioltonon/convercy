@@ -30,7 +30,13 @@ A currency conversion management API written in Go.
 
 ## Documentation
 
+### API
+
 The API complete specification can be found at docs/Convercy.postman_collection.json
+
+### Sequence diagrams
+
+Sequence diagrams can be found at docs/websequencediagrams directory
 
 ## Running tests
 
