@@ -81,3 +81,13 @@ func (s *CurrencyRegistrationService) UnregisterCurrency(request dto.UnregisterC
 
 	return nil
 }
+
+// ListRegisteredCurrencies lists all registered currencies
+func (s *CurrencyRegistrationService) ListRegisteredCurrencies() (dto.ListRegisteredCurrenciesResponse, error) {
+	registeredCurrencies, err := s.registeredCurrenciesRepository.GetRegisteredCurrencies()
+	if err != nil && !errors.As(err, new(domain.ErrNotFound)) {
+		return nil, err
+	}
+
+	return dto.BuildListRegisteredCurrenciesResponse(registeredCurrencies.Currencies()), nil
+}

@@ -69,6 +69,16 @@ func (c *CurrencyController) UnregisterCurrency(w http.ResponseWriter, r *http.R
 	response.JSON(w, response.NoContent())
 }
 
+func (c *CurrencyController) ListRegisteredCurrencies(w http.ResponseWriter, r *http.Request) {
+	result, err := c.currencyRegistrationService.ListRegisteredCurrencies()
+	if err != nil {
+		response.JSON(w, response.InternalServerError(err))
+		return
+	}
+
+	response.JSON(w, response.OK(result))
+}
+
 func (c *CurrencyController) ConvertCurrency(w http.ResponseWriter, r *http.Request) {
 	request, err := dto.ParseConvertCurrencyRequest(r)
 	if err != nil {

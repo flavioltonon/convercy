@@ -83,6 +83,7 @@ func main() {
 	// Setup router
 	router := mux.NewRouter()
 	router.HandleFunc("/api/convert/{currency_code}/{currency_amount}", currencyController.ConvertCurrency).Methods(http.MethodGet)
+	router.HandleFunc("/api/backoffice/currencies", currencyController.ListRegisteredCurrencies).Methods(http.MethodGet)
 	router.HandleFunc("/api/backoffice/currencies", currencyController.RegisterCurrency).Methods(http.MethodPost)
 	router.HandleFunc("/api/backoffice/currencies/{currency_id}", currencyController.UnregisterCurrency).Methods(http.MethodDelete)
 	router.Use(middleware.Log(logger))

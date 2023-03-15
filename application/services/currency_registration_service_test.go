@@ -22,8 +22,6 @@ type CurrencyRegistrationServiceTestSuite struct {
 
 	clientID valueobject.ClientID
 
-	currencyID valueobject.CurrencyID
-
 	currencies struct {
 		brl struct {
 			currencyID   valueobject.CurrencyID
@@ -41,6 +39,8 @@ type CurrencyRegistrationServiceTestSuite struct {
 			currencyCode valueobject.CurrencyCode
 		}
 	}
+
+	registeredCurrencies *aggregate.RegisteredCurrencies
 }
 
 func (s *CurrencyRegistrationServiceTestSuite) SetupSuite() {
@@ -54,6 +54,8 @@ func (s *CurrencyRegistrationServiceTestSuite) SetupSuite() {
 	s.currencies.usd.currencyCode, _ = valueobject.NewCurrencyCode("USD")
 	s.currencies.usd.currency, _ = entity.NewCurrency(s.currencies.usd.currencyID, s.currencies.usd.currencyCode)
 	s.currencies.invalid.currencyCode, _ = valueobject.NewCurrencyCode("FOO")
+
+	s.registeredCurrencies = aggregate.NewRegisteredCurrencies(s.clientID, s.currencies.brl.currency, s.currencies.usd.currency)
 }
 
 func TestCurrencyRegistrationServiceTestSuite(t *testing.T) {
@@ -347,3 +349,71 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_U
 	}
 }
 
+func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_ListRegisteredCurrencies() {
+	type fields struct {
+		registeredCurrenciesRepository func() repositories.RegisteredCurrenciesRepository
+	}
+
+	tests := []struct {
+		name    string
+		fields  fields
+		want    dto.ListRegisteredCurrenciesResponse
+		wantErr bool
+	}{
+		{
+			name: "When the search for registered currencies fails (except for domain.ErrNotFound errors), an error should be returned",
+			fields: fields{
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+					mock.On("GetRegisteredCurrencies").Return(nil, errors.New("some error"))
+					return mock
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "When everything works as intended and everything is valid, no errors should be returned",
+			fields: fields{
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+					mock.On("GetRegisteredCurrencies").Return(s.registeredCurrencies, nil)
+					return mock
+				},
+			},
+			want: dto.ListRegisteredCurrenciesResponse{
+				{
+					ID:   s.currencies.brl.currencyID.String(),
+					Code: s.currencies.brl.currencyCode.String(),
+				},
+				{
+					ID:   s.currencies.usd.currencyID.String(),
+					Code: s.currencies.usd.currencyCode.String(),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "When the search for registered currencies fails with a domain.ErrRegisteredCurrenciesNotFound, no errors should be returned",
+			fields: fields{
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+					mock.On("GetRegisteredCurrencies").Return(nil, domain.ErrRegisteredCurrenciesNotFound())
+					return mock
+				},
+			},
+			want:    dto.ListRegisteredCurrenciesResponse{},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			service := &CurrencyRegistrationService{
+				registeredCurrenciesRepository: tt.fields.registeredCurrenciesRepository(),
+			}
+			got, err := service.ListRegisteredCurrencies()
+			s.ElementsMatch(tt.want, got)
+			s.Equal(tt.wantErr, err != nil)
+		})
+	}
+}
