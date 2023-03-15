@@ -18,5 +18,8 @@ start: stop
 stop:
 	docker-compose down --remove-orphans
 
+tests:
+	go test -cover ./...
+
 tidy:
 	go fmt ./...
