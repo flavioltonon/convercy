@@ -11,8 +11,7 @@ Uma API de conversão de moedas escrita em Go.
 
 ### Gerenciamento de moedas registradas
 
-A aplicação permite o controle de moedas registradas pelo usuário. Moedas registradas representam quais resultados de conversão
-de moedas deverão ser entregues pela funcionalidade de conversão.
+A aplicação permite o controle de moedas registradas pelo usuário. Moedas registradas representam quais resultados de conversão de moedas deverão ser entregues pela funcionalidade de conversão.
 
 ### Convertendo uma quantidade de moeda
 
@@ -48,3 +47,8 @@ Diagramas de sequência dos fluxos da aplicação podem ser encontrados no diret
 ### Outros sistemas operacionais
 
 > go test -cover ./...
+
+## Roadmap
+
+- [ ] Adicionar camada de cache para reduzir a quantidade de chamadas para a API de taxas de câmbio da OpenExchangeRates
+- [ ] Adicionar camada de autenticação para controlar o gerenciamento de moedas registradas por client
