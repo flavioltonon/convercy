@@ -6,6 +6,7 @@ import (
 	"convercy/domain/valueobject"
 )
 
+// CurrencyCodeValidationService is an implementation of usecases.CurrencyCodeValidationService interface
 type CurrencyCodeValidationService struct {
 	currenciesService usecases.CurrenciesService
 }

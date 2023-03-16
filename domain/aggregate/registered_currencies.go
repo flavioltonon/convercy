@@ -6,6 +6,7 @@ import (
 	"convercy/domain/valueobject"
 )
 
+// RegisteredCurrencies is an aggregate intended to ensure the business invariants related to the currency registration bounded context
 type RegisteredCurrencies struct {
 	clientID   valueobject.ClientID
 	currencies []*entity.Currency

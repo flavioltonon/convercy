@@ -7,6 +7,7 @@ import (
 	"convercy/domain/valueobject"
 )
 
+// CurrencyExchangeRatesService is an implementation of usecases.CurrencyExchangeRatesService interface
 type CurrencyExchangeRatesService struct {
 	core usecases.ExchangeRatesService
 }
@@ -46,6 +47,7 @@ func (s *CurrencyExchangeRatesService) ListCurrencyExchangeRates(currency *entit
 	return relativeExchangeRates, nil
 }
 
+// combineExchangeRates combines two different exchange rates (e.g. BRL/USD and EUR/USD -> BRL/EUR)
 func (s *CurrencyExchangeRatesService) combineExchangeRates(
 	base valueobject.ExchangeRate,
 	target valueobject.ExchangeRate,

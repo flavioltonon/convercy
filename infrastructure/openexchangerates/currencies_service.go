@@ -2,6 +2,7 @@ package openexchangerates
 
 import "convercy/domain/valueobject"
 
+// CurrenciesService is an implementation of usecases.CurrenciesService interface
 type CurrenciesService struct {
 	client *Client
 }

@@ -5,6 +5,7 @@ import (
 	"convercy/domain/valueobject"
 )
 
+// CurrencyConversionService is an implementation of usecases.CurrencyConversionService interface
 type CurrencyConversionService struct{}
 
 func NewCurrencyConversionService() *CurrencyConversionService {

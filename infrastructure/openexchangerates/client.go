@@ -8,6 +8,7 @@ import (
 	"net/url"
 )
 
+// Client is an HTTP client capable of communicating with OpenExchangeRates API
 type Client struct {
 	httpClient *http.Client
 	appID      string
