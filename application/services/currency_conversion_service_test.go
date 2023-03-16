@@ -81,11 +81,7 @@ func (s *CurrencyConversionServiceTestSuite) SetupSuite() {
 	s.exchangeRates.gbpBrl, _ = valueobject.NewExchangeRate(9.931458, "GBP", "BRL")
 	s.exchangeRates.gbpUsd, _ = valueobject.NewExchangeRate(1.92276, "GBP", "USD")
 
-	s.registeredCurrencies = aggregate.NewRegisteredCurrencies(
-		s.clientID,
-		s.currencies.brl.currency,
-		s.currencies.usd.currency,
-	)
+	s.registeredCurrencies = aggregate.NewRegisteredCurrencies(s.clientID, s.currencies.brl.currency, s.currencies.usd.currency)
 }
 
 func TestCurrencyConversionServiceTestSuite(t *testing.T) {
