@@ -8,15 +8,18 @@ import (
 	"convercy/application/services"
 	"convercy/domain"
 	"convercy/infrastructure/response"
+	"convercy/shared/logging"
 )
 
 type CurrencyController struct {
 	currencyConversionService *services.CurrencyConversionService
+	logger                    logging.Logger
 }
 
-func NewCurrencyController(currencyConversionService *services.CurrencyConversionService) *CurrencyController {
+func NewCurrencyController(currencyConversionService *services.CurrencyConversionService, logger logging.Logger) *CurrencyController {
 	return &CurrencyController{
 		currencyConversionService: currencyConversionService,
+		logger:                    logger,
 	}
 }
 
@@ -35,6 +38,7 @@ func (c *CurrencyController) ConvertCurrency(w http.ResponseWriter, r *http.Requ
 		case errors.As(err, new(domain.ErrNotFound)):
 			response.JSON(w, response.NotFound(err))
 		default:
+			c.logger.Error("failed to convert currency", logging.Error(err))
 			response.JSON(w, response.InternalServerError(err))
 		}
 

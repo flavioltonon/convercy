@@ -63,8 +63,8 @@ func main() {
 		currenciesRepository                   = mongodb.NewCurrenciesRepository(registeredCurrenciesMapper, repository)
 		currencyConversionApplicationService   = applicationServices.NewCurrencyConversionService(currencyCodeValidationService, currencyConversionDomainService, currenciesRepository, currencyExchangeRatesService)
 		currencyRegistrationApplicationService = applicationServices.NewCurrencyRegistrationService(currencyCodeValidationService, currenciesRepository)
-		backofficeCurrencyController           = backoffice.NewCurrencyController(currencyRegistrationApplicationService)
-		userCurrencyController                 = user.NewCurrencyController(currencyConversionApplicationService)
+		backofficeCurrencyController           = backoffice.NewCurrencyController(currencyRegistrationApplicationService, logger)
+		userCurrencyController                 = user.NewCurrencyController(currencyConversionApplicationService, logger)
 	)
 
 	// Setup router

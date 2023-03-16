@@ -8,15 +8,18 @@ import (
 	"convercy/application/services"
 	"convercy/domain"
 	"convercy/infrastructure/response"
+	"convercy/shared/logging"
 )
 
 type CurrencyController struct {
 	currencyRegistrationService *services.CurrencyRegistrationService
+	logger                      logging.Logger
 }
 
-func NewCurrencyController(currencyRegistrationService *services.CurrencyRegistrationService) *CurrencyController {
+func NewCurrencyController(currencyRegistrationService *services.CurrencyRegistrationService, logger logging.Logger) *CurrencyController {
 	return &CurrencyController{
 		currencyRegistrationService: currencyRegistrationService,
+		logger:                      logger,
 	}
 }
 
@@ -33,6 +36,7 @@ func (c *CurrencyController) RegisterCurrency(w http.ResponseWriter, r *http.Req
 		case errors.As(err, new(domain.ErrValidationFailure)), errors.As(err, new(domain.ErrAlreadyExists)):
 			response.JSON(w, response.BadRequest(err))
 		default:
+			c.logger.Error("failed to register currency", logging.Error(err))
 			response.JSON(w, response.InternalServerError(err))
 		}
 
@@ -56,6 +60,7 @@ func (c *CurrencyController) UnregisterCurrency(w http.ResponseWriter, r *http.R
 		case errors.As(err, new(domain.ErrNotFound)):
 			response.JSON(w, response.NotFound(err))
 		default:
+			c.logger.Error("failed to unregister currency", logging.Error(err))
 			response.JSON(w, response.InternalServerError(err))
 		}
 
@@ -68,6 +73,7 @@ func (c *CurrencyController) UnregisterCurrency(w http.ResponseWriter, r *http.R
 func (c *CurrencyController) ListRegisteredCurrencies(w http.ResponseWriter, r *http.Request) {
 	result, err := c.currencyRegistrationService.ListRegisteredCurrencies()
 	if err != nil {
+		c.logger.Error("failed to list registered currencies", logging.Error(err))
 		response.JSON(w, response.InternalServerError(err))
 		return
 	}
