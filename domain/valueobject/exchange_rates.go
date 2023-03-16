@@ -4,7 +4,7 @@ import "convercy/domain"
 
 type ExchangeRates []ExchangeRate
 
-func (v ExchangeRates) FindByCode(code CurrencyCode) (ExchangeRate, error) {
+func (v ExchangeRates) FindByBaseCurrencyCode(code CurrencyCode) (ExchangeRate, error) {
 	for _, exchangeRate := range v {
 		if exchangeRate.unit.BaseCurrencyCode().Equal(code) {
 			return exchangeRate, nil

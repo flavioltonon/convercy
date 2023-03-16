@@ -23,7 +23,7 @@ func (s *CurrencyExchangeRatesService) ListCurrencyExchangeRates(currency *entit
 		return nil, err
 	}
 
-	baseExchangeRate, err := exchangeRates.FindByCode(currency.Code())
+	baseExchangeRate, err := exchangeRates.FindByBaseCurrencyCode(currency.Code())
 	if err != nil {
 		return nil, err
 	}
