@@ -31,8 +31,7 @@ Com o Convercy, você pode
 
 ### API
 
-A especificação completa da API pode ser encontrada em docs/openapi.json. Esta especificação pode ser facilmente importada em ferramentas como
-o Postman ou o Insomnia.
+A especificação completa da API pode ser encontrada em docs/openapi.json. Esta especificação pode ser facilmente importada em ferramentas como o Postman ou o Insomnia.
 
 ### Diagramas de sequência
 
@@ -50,5 +49,5 @@ Diagramas de sequência dos fluxos da aplicação podem ser encontrados no diret
 
 ## Roadmap
 
-- [ ] Adicionar camada de cache para reduzir a quantidade de chamadas para a API de taxas de câmbio da OpenExchangeRates
+- [ ] Adicionar camada de cache para reduzir a quantidade de chamadas para a API de taxas de câmbio da OpenExchangeRates (https://openexchangerates.org)
 - [ ] Adicionar camada de autenticação para controlar o gerenciamento de moedas registradas por client
