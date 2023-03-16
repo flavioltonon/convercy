@@ -18,6 +18,10 @@ func NewCurrencyExchangeRatesService(core usecases.ExchangeRatesService) *Curren
 }
 
 func (s *CurrencyExchangeRatesService) ListCurrencyExchangeRates(currency *entity.Currency) (valueobject.ExchangeRates, error) {
+	if err := currency.Validate(); err != nil {
+		return nil, err
+	}
+
 	exchangeRates, err := s.core.ListExchangeRates()
 	if err != nil {
 		return nil, err

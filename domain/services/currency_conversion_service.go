@@ -16,6 +16,18 @@ func (s *CurrencyConversionService) ConvertCurrency(
 	code valueobject.CurrencyCode,
 	exchangeRate valueobject.ExchangeRate,
 ) (valueobject.CurrencyAmount, error) {
+	if err := amount.Validate(); err != nil {
+		return valueobject.CurrencyAmount{}, err
+	}
+
+	if err := code.Validate(); err != nil {
+		return valueobject.CurrencyAmount{}, err
+	}
+
+	if err := exchangeRate.Validate(); err != nil {
+		return valueobject.CurrencyAmount{}, err
+	}
+
 	if !exchangeRate.Unit().BaseCurrencyCode().Equal(code) {
 		return valueobject.CurrencyAmount{}, domain.ErrUnexpectedExchangeRateBaseCurrencyCode(
 			code.String(),

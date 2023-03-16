@@ -15,6 +15,10 @@ func NewCurrencyCodeValidationService(currenciesService usecases.CurrenciesServi
 }
 
 func (s *CurrencyCodeValidationService) ValidateCurrencyCode(code valueobject.CurrencyCode) error {
+	if err := code.Validate(); err != nil {
+		return err
+	}
+
 	codes, err := s.currenciesService.ListCurrencyCodes()
 	if err != nil {
 		return err
