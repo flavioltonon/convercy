@@ -25,7 +25,7 @@ Com o Convercy, você pode
 
 ### Outros sistemas operacionais
 
-> docker-compose up --build
+> docker-compose up
 
 ## Documentação
 
@@ -46,7 +46,7 @@ Diagramas de sequência dos fluxos da aplicação podem ser encontrados no diret
 
 ### Outros sistemas operacionais
 
-> go test -cover ./...
+> go test -cover ./application/services/... ./domain/services/...
 
 ## Roadmap
 
