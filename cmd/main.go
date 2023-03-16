@@ -52,28 +52,16 @@ func main() {
 	defer repository.Disconnect()
 
 	var (
-		openExchangeRatesClient = openexchangerates.NewClient(
-			http.DefaultClient,
-			config.OpenExchangeRates.AppID,
-			config.OpenExchangeRates.BaseURL,
-		)
-		currenciesService               = openexchangerates.NewCurrenciesService(openExchangeRatesClient)
-		exchangeRatesService            = openexchangerates.NewExchangeRatesService(openExchangeRatesClient)
-		currencyCodeValidationService   = domainServices.NewCurrencyCodeValidationService(currenciesService)
-		currencyExchangeRatesService    = domainServices.NewCurrencyExchangeRatesService(exchangeRatesService)
-		currencyConversionDomainService = domainServices.NewCurrencyConversionService()
-		currencyMapper                  = mappers.NewCurrencyMapper()
-		registeredCurrenciesMapper      = mappers.NewRegisteredCurrenciesMapper(currencyMapper)
-		currenciesRepository            = mongodb.NewCurrenciesRepository(
-			registeredCurrenciesMapper,
-			repository,
-		)
-		currencyConversionApplicationService = applicationServices.NewCurrencyConversionService(
-			currencyCodeValidationService,
-			currencyConversionDomainService,
-			currenciesRepository,
-			currencyExchangeRatesService,
-		)
+		openExchangeRatesClient                = openexchangerates.NewClient(http.DefaultClient, config.OpenExchangeRates.AppID, config.OpenExchangeRates.BaseURL)
+		currenciesService                      = openexchangerates.NewCurrenciesService(openExchangeRatesClient)
+		exchangeRatesService                   = openexchangerates.NewExchangeRatesService(openExchangeRatesClient)
+		currencyCodeValidationService          = domainServices.NewCurrencyCodeValidationService(currenciesService)
+		currencyExchangeRatesService           = domainServices.NewCurrencyExchangeRatesService(exchangeRatesService)
+		currencyConversionDomainService        = domainServices.NewCurrencyConversionService()
+		currencyMapper                         = mappers.NewCurrencyMapper()
+		registeredCurrenciesMapper             = mappers.NewRegisteredCurrenciesMapper(currencyMapper)
+		currenciesRepository                   = mongodb.NewCurrenciesRepository(registeredCurrenciesMapper, repository)
+		currencyConversionApplicationService   = applicationServices.NewCurrencyConversionService(currencyCodeValidationService, currencyConversionDomainService, currenciesRepository, currencyExchangeRatesService)
 		currencyRegistrationApplicationService = applicationServices.NewCurrencyRegistrationService(currencyCodeValidationService, currenciesRepository)
 		backofficeCurrencyController           = backoffice.NewCurrencyController(currencyRegistrationApplicationService)
 		userCurrencyController                 = user.NewCurrencyController(currencyConversionApplicationService)
