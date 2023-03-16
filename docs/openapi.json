@@ -1,0 +1,327 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Convercy",
+        "summary": "An API for currency conversion",
+        "contact": {
+            "name": "Flávio Tonon",
+            "email": "flavioltonon@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080/api",
+            "description": "Local development server"
+        }
+    ],
+    "paths": {
+        "/convert/{CurrencyCode}/{CurrencyAmount}": {
+            "get": {
+                "summary": "Convert a currency amount",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/CurrencyCode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/CurrencyAmount"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConvertCurrencyResponse"
+                                },
+                                "examples": {
+                                    "ConvertCurrencyResponse": {
+                                        "$ref": "#/components/examples/ConvertCurrencyResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request params",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "examples": {
+                                    "Error": {
+                                        "$ref": "#/components/examples/Error"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "examples": {
+                                    "Error": {
+                                        "$ref": "#/components/examples/Error"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/backoffice/currencies": {
+            "get": {
+                "summary": "List registered currencies",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListRegisteredCurrenciesResponse"
+                                },
+                                "examples": {
+                                    "ListRegisteredCurrenciesResponse": {
+                                        "$ref": "#/components/examples/ListRegisteredCurrenciesResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Register currency",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterCurrencyRequest"
+                            },
+                            "examples": {
+                                "RegisterCurrencyRequest": {
+                                    "$ref": "#/components/examples/RegisterCurrencyRequest"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RegisterCurrencyResponse"
+                                },
+                                "examples": {
+                                    "RegisterCurrencyResponse": {
+                                        "$ref": "#/components/examples/RegisterCurrencyResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request params",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "examples": {
+                                    "Error": {
+                                        "$ref": "#/components/examples/Error"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "examples": {
+                                    "Error": {
+                                        "$ref": "#/components/examples/Error"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/backoffice/currencies/{CurrencyID}": {
+            "delete": {
+                "summary": "Unregister a currency",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/CurrencyID"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Invalid request params",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "examples": {
+                                    "Error": {
+                                        "$ref": "#/components/examples/Error"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "examples": {
+                                    "Error": {
+                                        "$ref": "#/components/examples/Error"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ConvertCurrencyResponse": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "number",
+                    "format": "double"
+                }
+            },
+            "RegisterCurrencyRequest": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "description": "Code of the currency that the user wants to register",
+                        "type": "string",
+                        "required": true
+                    }
+                }
+            },
+            "RegisterCurrencyResponse": {
+                "type": "object",
+                "properties": {
+                    "CurrencyID": {
+                        "description": "ID of the currency that has been registered",
+                        "type": "string",
+                        "required": true
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "description": "Error message"
+                    }
+                },
+                "examples": {
+                    "Error": {
+                        "$ref": "#/components/examples/Error"
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "CurrencyID": {
+                "name": "CurrencyID",
+                "in": "path",
+                "description": "Unique identifier of a currency",
+                "required": true,
+                "schema": {
+                    "type": "string"
+                },
+                "example": "21a21a34-af48-456b-84d8-5dc5b4a7e3ae"
+            },
+            "CurrencyCode": {
+                "name": "CurrencyCode",
+                "in": "path",
+                "description": "Code of a currency",
+                "required": true,
+                "schema": {
+                    "type": "string"
+                },
+                "example": "BRL"
+            },
+            "CurrencyAmount": {
+                "name": "CurrencyAmount",
+                "in": "path",
+                "description": "Amount of a currency",
+                "required": true,
+                "schema": {
+                    "type": "number",
+                    "format": "float"
+                },
+                "example": 529.00
+            }
+        },
+        "examples": {
+            "ConvertCurrencyResponse": {
+                "value": {
+                    "USD": 98.23,
+                    "EUR": 83.26,
+                    "INR": 7318.93
+                }
+            },
+            "Error": {
+                "value": {
+                    "message": "something went wrong"
+                }
+            },
+            "ListRegisteredCurrenciesResponse": {
+                "value": [
+                    {
+                        "_id": "21a21a34-af48-456b-84d8-5dc5b4a7e3ae",
+                        "code": "BRL"
+                    },
+                    {
+                        "_id": "3cac6b62-9731-4a24-b7f2-74ab4c2fe326",
+                        "code": "USD"
+                    }
+                ]
+            },
+            "RegisterCurrencyRequest": {
+                "value": {
+                    "code": "BRL"
+                }
+            },
+            "RegisterCurrencyResponse": {
+                "value": {
+                    "_id": "21a21a34-af48-456b-84d8-5dc5b4a7e3ae",
+                    "code": "BRL"
+                }
+            }
+        }
+    }
+}
