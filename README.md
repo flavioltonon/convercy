@@ -1,49 +1,50 @@
 # Convercy
 
-A currency conversion management API written in Go.
+Uma API de conversão de moedas escrita em Go.
 
-## Pre-requisites
+## Pré-requisitos
 
-- golang@v1.18 or newer
+- golang@v1.18 ou mais recente
 - docker-compose@v2.15.1
 
-## Features
+## Funcionalidades
 
-### Managing registered currencies
+### Gerenciamento de moedas registradas
 
-- Register currency
-- Unregister currency
+A aplicação permite o controle de moedas registradas pelo usuário. Moedas registradas representam quais resultados de conversão
+de moedas deverão ser entregues pela funcionalidade de conversão.
 
-### Converting a currency
+### Convertendo uma quantidade de moeda
 
-- Convert currency
+Com o Convercy, você pode 
 
-## Running the project
+## Rodando o projeto
 
-### Unix-based Operational Systems
+### Sistemas operacionais baseados em Unix
 
 > make start
 
-### Other Operational Systems
+### Outros sistemas operacionais
 
 > docker-compose up --build
 
-## Documentation
+## Documentação
 
 ### API
 
-The API complete specification can be found at docs/Convercy.postman_collection.json
+A especificação completa da API pode ser encontrada em docs/openapi.json. Esta especificação pode ser facilmente importada em ferramentas como
+o Postman ou o Insomnia.
 
-### Sequence diagrams
+### Diagramas de sequência
 
-Sequence diagrams can be found at docs/websequencediagrams directory
+Diagramas de sequência dos fluxos da aplicação podem ser encontrados no diretório docs/websequencediagrams.
 
-## Running tests
+## Rodando testes
 
-### Unix-based Operational Systems
+### Sistemas operacionais baseados em Unix
 
 > make tests
 
-### Other Operational Systems
+### Outros sistemas operacionais
 
 > go test -cover ./...
