@@ -15,7 +15,7 @@ A aplicação permite o controle de moedas registradas pelo usuário. Moedas reg
 
 ### Convertendo uma quantidade de moeda
 
-Com o Convercy, você pode 
+Com o Convercy, você pode fazer a conversão de quantidades de uma moeda específica para todos os tipos de moeda que você tiver registrado.
 
 ## Rodando o projeto
 
@@ -51,3 +51,4 @@ Diagramas de sequência dos fluxos da aplicação podem ser encontrados no diret
 
 - [ ] Adicionar camada de cache para reduzir a quantidade de chamadas para a API de taxas de câmbio da OpenExchangeRates (https://openexchangerates.org)
 - [ ] Adicionar camada de autenticação para controlar o gerenciamento de moedas registradas por client
+- [x] Adicionar pipeline de CI para testar alterações feitas na branch main e publicar imagens Docker quando uma release for criada
