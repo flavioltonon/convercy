@@ -10,6 +10,9 @@ check:
 image:
 	docker build --rm -f Dockerfile -t flavioltonon/convercy:latest .
 
+install:
+	go mod tidy
+
 push:
 	docker push flavioltonon/convercy:latest
 
