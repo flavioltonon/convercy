@@ -13,7 +13,6 @@ RUN make build
 FROM scratch
 
 COPY --from=builder /app/build/bin /bin
-COPY --from=builder /app/config.yaml /config.yaml
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "convercy" ]

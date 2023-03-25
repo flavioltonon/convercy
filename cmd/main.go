@@ -25,7 +25,7 @@ import (
 )
 
 func main() {
-	config, err := config.FromFile("config.yaml")
+	config, err := config.New()
 	if err != nil {
 		panic(err)
 	}
@@ -37,7 +37,7 @@ func main() {
 
 	repository, err := mongodb.NewRepository(&mongodb.Options{
 		Database: mongodb.DatabaseOptions{
-			Name: "gruposbf",
+			Name: "convercy",
 			URI:  config.Database.URI,
 		},
 	})
