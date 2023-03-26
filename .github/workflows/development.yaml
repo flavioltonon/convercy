@@ -12,6 +12,7 @@ jobs:
 
   test:
     runs-on: ubuntu-22.04
+    needs: setup
     steps:
       - name: Set up Go
         uses: actions/setup-go@v3
