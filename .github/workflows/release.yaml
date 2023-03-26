@@ -41,6 +41,8 @@ jobs:
         run: make image push
 
   release:
+    environment: production
+    runs-on: ubuntu-22.04
     steps:
       - name: Get latest release
         id: get-latest-release
