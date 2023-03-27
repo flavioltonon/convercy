@@ -34,7 +34,6 @@ runs:
       with:
         sinceTag: ${{ steps.get-latest-release.outputs.release }}
         token: ${{ inputs.github_token }}
-        unreleased: false
 
     - name: Create release
       uses: ncipollo/release-action@v1.12.0

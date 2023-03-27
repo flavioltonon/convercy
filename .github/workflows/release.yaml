@@ -1,7 +1,7 @@
-name: Make release
+name: Release
 on:
   push:
-    branches: main
+    branches: fix/ci-workflow
 jobs:
   test:
     runs-on: ubuntu-22.04
