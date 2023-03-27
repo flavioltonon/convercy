@@ -1,0 +1,42 @@
+name: Create GitHub release
+inputs:
+  github_repository:
+    required: true
+    type: string
+  github_token:
+    required: true
+    type: string
+runs:
+  using: composite
+  steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Get latest release
+      id: get-latest-release
+      uses: pozetroninc/github-action-get-latest-release@v0.7.0
+      with:
+        repository: ${{ inputs.github_repository }}
+        token: ${{ inputs.github_token }}
+
+    - name: Increment release version
+      id: increment-release-version
+      uses: christian-draeger/increment-semantic-version@1.1.0
+      with:
+        current-version: ${{ steps.get-latest-release.outputs.release }}
+        version-fragment: feature
+
+    - name: Generate changelog
+      id: generate-changelog
+      uses: heinrichreimer/action-github-changelog-generator@v2.3
+      with:
+        token: ${{ inputs.github_token }}
+        sinceTag: ${{ steps.get-latest-release.outputs.release }}
+
+    - name: Create release
+      uses: ncipollo/release-action@v1.12.0
+      with:
+        tag: ${{ steps.increment-release-version.outputs.next-version }}
+        body: ${{ steps.generate-changelog.outputs.changelog }}

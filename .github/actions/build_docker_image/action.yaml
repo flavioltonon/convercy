@@ -1,0 +1,29 @@
+name: Create and publish Docker image to DockerHub
+inputs:
+  dockerhub_username:
+    required: true
+    type: string
+  dockerhub_password:
+    required: true
+    type: string
+  version:
+    required: true
+    type: string
+runs:
+  using: composite
+  steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ inputs.dockerhub_username }}
+        password: ${{ inputs.dockerhub_password }}
+    
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: flavioltonon/convercy:latest
