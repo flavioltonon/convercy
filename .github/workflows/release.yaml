@@ -2,12 +2,14 @@ name: Make release
 on:
   push:
     branches: feat/ci-release
+env:
+  RUN_TESTS_LOCATION: ${{ github.repository }}/.github/workflows/run_tests.yaml@${{ github.sha }}
 jobs:
   test:
     runs-on: ubuntu-22.04
     steps:
       - name: Run tests
-        uses: ${{ github.repository }}/.github/workflows/run_tests.yaml@${{ github.sha }}
+        uses: $RUN_TESTS_LOCATION
   build:
     runs-on: ubuntu-22.04
     needs: test
