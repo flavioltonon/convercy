@@ -6,11 +6,14 @@ env:
   OS: ubuntu-22.04
 jobs:
   test:
+    name: Run tests
     runs-on: $OS
-    uses: .github/workflows/run_tests.yaml
+    uses: ./.github/workflows/run_tests.yaml
   build:
+    name: Build image
     runs-on: $OS
-    uses: .github/workflows/build_docker_image.yaml
+    uses: ./.github/workflows/build_docker_image.yaml
   release:
+    name: Create release
     runs-on: $OS
-    uses: .github/workflows/create_github_release.yaml
+    uses: ./.github/workflows/create_github_release.yaml
