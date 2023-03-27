@@ -30,10 +30,10 @@ runs:
 
     - name: Generate changelog
       id: generate-changelog
-      uses: natescherer/changelog-management-action@v1.0.0
+      uses: mikepenz/release-changelog-builder-action@v3.7.0
       with:
-        mode: release
-        releaseVersion: ${{ steps.increment-release-version.outputs.next-version }}
+        fromTag: ${{ steps.get-latest-release.outputs.release }}
+        token: ${{ inputs.github_token }}
 
     - name: Create release
       uses: ncipollo/release-action@v1.12.0
@@ -42,5 +42,5 @@ runs:
         body: |
           # Changelog
 
-          ${{ steps.generate-changelog.outputs.releaseNotes }}
+          ${{ steps.generate-changelog.outputs.changelog }}
 

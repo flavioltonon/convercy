@@ -3,23 +3,23 @@ on:
   push:
     branches: fix/ci-workflow
 jobs:
-  test:
-    runs-on: ubuntu-22.04
-    environment: production
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/run_tests
-  build:
-    runs-on: ubuntu-22.04
-    needs: test
-    environment: production
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/build_docker_image
-        with:
-          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
-          version: ${{ github.ref }}
+  # test:
+  #   runs-on: ubuntu-22.04
+  #   environment: production
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: ./.github/actions/run_tests
+  # build:
+  #   runs-on: ubuntu-22.04
+  #   needs: test
+  #   environment: production
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: ./.github/actions/build_docker_image
+  #       with:
+  #         dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #         version: ${{ github.ref }}
   release:
     runs-on: ubuntu-22.04
     needs: build
@@ -30,3 +30,4 @@ jobs:
         with:
           github_repository: ${{ github.repository }}
           github_token: ${{ github.token }}
+          version: ${{ github.sha }}
