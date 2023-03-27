@@ -7,12 +7,12 @@ env:
 jobs:
   test:
     runs-on: $RUNS_ON_OS
-    uses: ${{ github.repository }}/.github/workflows/run_tests.yaml@${{ github.sha }}
+    uses: "${{ github.repository }}/.github/workflows/run_tests.yaml@${{ github.sha }}"
 
   build:
     runs-on: $RUNS_ON_OS
-    uses: ${{ github.repository }}/.github/workflows/build_docker_image.yaml@${{ github.sha }}
+    uses: "${{ github.repository }}/.github/workflows/build_docker_image.yaml@${{ github.sha }}"
 
   release:
     runs-on: $RUNS_ON_OS
-    uses: ${{ github.repository }}/.github/workflows/create_github_release.yaml@${{ github.sha }}
+    uses: "${{ github.repository }}/.github/workflows/create_github_release.yaml@${{ github.sha }}"
