@@ -22,6 +22,7 @@ jobs:
           github_repository: ${{ github.repository }}
           github_token: ${{ github.token }}
       - run: echo ${{ needs.bump-version.outputs }}
+      
   # build:
   #   name: Build image
   #   runs-on: ubuntu-22.04
