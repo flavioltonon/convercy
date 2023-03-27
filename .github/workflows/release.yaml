@@ -12,11 +12,13 @@ jobs:
         uses: ./.github/workflows/run_tests.yaml
   build:
     runs-on: $OS
+    needs: test
     steps:
       - name: Build image
         uses: ./.github/workflows/build_docker_image.yaml
   release:
     runs-on: $OS
+    needs: build
     steps:
       - name: Create release
         uses: ./.github/workflows/create_github_release.yaml
