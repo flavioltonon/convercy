@@ -30,15 +30,17 @@ runs:
 
     - name: Generate changelog
       id: generate-changelog
-      uses: heinrichreimer/action-github-changelog-generator@v2.3
+      uses: vemel/update-changelog@0.0.1
       with:
-        sinceTag: ${{ steps.get-latest-release.outputs.release }}
-        stripGeneratorNotice: "true"
         token: ${{ inputs.github_token }}
-        unreleased: "false"
+        version: ${{ steps.increment-release-version.outputs.next-version }}
 
     - name: Create release
       uses: ncipollo/release-action@v1.12.0
       with:
         tag: ${{ steps.increment-release-version.outputs.next-version }}
-        body: ${{ steps.generate-changelog.outputs.changelog }}
+        body: |
+          # Changelog
+
+          ${{ steps.generate-changelog.outputs.pulls_list_md }}
+
