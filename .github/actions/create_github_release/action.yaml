@@ -30,10 +30,10 @@ runs:
 
     - name: Generate changelog
       id: generate-changelog
-      uses: vemel/update-changelog@0.0.1
+      uses: natescherer/changelog-management-action@v1.0.0
       with:
-        token: ${{ inputs.github_token }}
-        version: ${{ steps.increment-release-version.outputs.next-version }}
+        mode: release
+        releaseVersion: ${{ steps.increment-release-version.outputs.next-version }}
 
     - name: Create release
       uses: ncipollo/release-action@v1.12.0
@@ -42,5 +42,5 @@ runs:
         body: |
           # Changelog
 
-          ${{ steps.generate-changelog.outputs.pulls_list_md }}
+          ${{ steps.generate-changelog.outputs.releaseNotes }}
 
