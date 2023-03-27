@@ -21,6 +21,7 @@ jobs:
         with:
           github_repository: ${{ github.repository }}
           github_token: ${{ github.token }}
+      - run: echo ${{ needs.bump-version.outputs }}
   # build:
   #   name: Build image
   #   runs-on: ubuntu-22.04
@@ -34,15 +35,15 @@ jobs:
   #         dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
   #         version: ${{ github.sha }}
 
-  release:
-    name: Create release
-    runs-on: ubuntu-22.04
-    needs: bump-version
-    environment: production
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/create-github-release
-        with:
-          changelog: ${{ needs.bump-version.outputs.changelog }}
-          github_token: ${{ github.token }}
-          release_version: ${{ needs.bump-version.outputs.next_version }}
+  # release:
+  #   name: Create release
+  #   runs-on: ubuntu-22.04
+  #   needs: bump-version
+  #   environment: production
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: ./.github/actions/create-github-release
+  #       with:
+  #         changelog: ${{ needs.bump-version.outputs.changelog }}
+  #         github_token: ${{ github.token }}
+  #         release_version: ${{ needs.bump-version.outputs.next_version }}
