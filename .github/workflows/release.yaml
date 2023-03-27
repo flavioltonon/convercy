@@ -14,11 +14,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/build_docker_image
-    secrets: inherit
+    with:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
+      version: ${{ github.ref }}
   release:
     runs-on: ubuntu-22.04
     needs: build
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/create_github_release
-    secrets: inherit
+    with:
+      github_repository: ${{ github.repository }}
+      github_token: ${{ github.token }}

@@ -1,5 +1,11 @@
 name: Create GitHub release
-on: workflow_call
+inputs:
+  github_repository:
+    required: true
+    type: string
+  github_token:
+    required: true
+    type: string
 runs:
   using: composite
   steps:
@@ -12,8 +18,8 @@ runs:
       id: get-latest-release
       uses: pozetroninc/github-action-get-latest-release@v0.7.0
       with:
-        repository: ${{ github.repository }}
-        token: ${{ github.token }}
+        repository: ${{ inputs.github_repository }}
+        token: ${{ inputs.github_token }}
 
     - name: Increment release version
       id: increment-release-version
@@ -26,7 +32,7 @@ runs:
       id: generate-changelog
       uses: heinrichreimer/action-github-changelog-generator@v2.3
       with:
-        token: ${{ github.token }}
+        token: ${{ inputs.github_token }}
         sinceTag: ${{ steps.get-latest-release.outputs.release }}
 
     - name: Create release
