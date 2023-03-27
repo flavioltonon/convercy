@@ -32,8 +32,10 @@ runs:
       id: generate-changelog
       uses: heinrichreimer/action-github-changelog-generator@v2.3
       with:
-        token: ${{ inputs.github_token }}
         sinceTag: ${{ steps.get-latest-release.outputs.release }}
+        stripGeneratorNotice: true
+        token: ${{ inputs.github_token }}
+        unreleased: false
 
     - name: Create release
       uses: ncipollo/release-action@v1.12.0
