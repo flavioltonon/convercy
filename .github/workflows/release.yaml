@@ -4,12 +4,25 @@ on:
     branches: fix/ci-workflow
 jobs:
   # test:
+  #   name: Run tests
   #   runs-on: ubuntu-22.04
   #   environment: production
   #   steps:
   #     - uses: actions/checkout@v3
   #     - uses: ./.github/actions/run_tests
+  bump-version:
+    name: Bump version
+    runs-on: ubuntu-22.04
+    needs: build
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/increment_release_version
+        with:
+          github_repository: ${{ github.repository }}
+          github_token: ${{ github.token }}
   # build:
+  #   name: Build image
   #   runs-on: ubuntu-22.04
   #   needs: test
   #   environment: production
@@ -19,8 +32,10 @@ jobs:
   #       with:
   #         dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
   #         dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
-  #         version: ${{ github.ref }}
+  #         version: ${{ github.sha }}
+
   release:
+    name: Create release
     runs-on: ubuntu-22.04
     needs: build
     environment: production
@@ -28,6 +43,4 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/create_github_release
         with:
-          github_repository: ${{ github.repository }}
           github_token: ${{ github.token }}
-          version: ${{ github.sha }}
