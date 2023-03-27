@@ -1,7 +1,7 @@
 name: Make release
 on:
   push:
-    branches: feat/ci-releasae
+    branches: feat/ci-release
 env:
   RUNS_ON_OS: ubuntu-22.04
 jobs:
