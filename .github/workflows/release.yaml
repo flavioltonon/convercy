@@ -9,7 +9,7 @@ jobs:
   #   environment: production
   #   steps:
   #     - uses: actions/checkout@v3
-  #     - uses: ./.github/actions/run_tests
+  #     - uses: ./.github/actions/run-tests
   bump-version:
     name: Bump version
     runs-on: ubuntu-22.04
@@ -17,7 +17,7 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/increment_release_version
+      - uses: ./.github/actions/increment-release-version
         with:
           github_repository: ${{ github.repository }}
           github_token: ${{ github.token }}
@@ -28,7 +28,7 @@ jobs:
   #   environment: production
   #   steps:
   #     - uses: actions/checkout@v3
-  #     - uses: ./.github/actions/build_docker_image
+  #     - uses: ./.github/actions/build-docker-image
   #       with:
   #         dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
   #         dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -37,10 +37,11 @@ jobs:
   release:
     name: Create release
     runs-on: ubuntu-22.04
-    # needs: build
+    needs: bump-version
     environment: production
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/create_github_release
+      - uses: ./.github/actions/create-github-release
         with:
           github_token: ${{ github.token }}
+          release_version: ${{ needs.bump-version.outputs.next_version }}
