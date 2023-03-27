@@ -14,9 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/build_docker_image
+    secrets: inherit
   release:
     runs-on: ubuntu-22.04
     needs: build
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/create_github_release
+    secrets: inherit
