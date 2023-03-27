@@ -5,12 +5,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-22.04
+    environment: production
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/run_tests
   build:
     runs-on: ubuntu-22.04
     needs: test
+    environment: production
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/build_docker_image
@@ -21,6 +23,7 @@ jobs:
   release:
     runs-on: ubuntu-22.04
     needs: build
+    environment: production
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/create_github_release
