@@ -2,17 +2,15 @@ name: Make release
 on:
   push:
     branches: feat/ci-release
-env:
-  RUNS_ON_OS: ubuntu-22.04
 jobs:
   test:
-    runs-on: $RUNS_ON_OS
+    runs-on: ubuntu-22.04
     uses: ./.github/workflows/run_tests.yaml
 
   build:
-    runs-on: $RUNS_ON_OS
+    runs-on: ubuntu-22.04
     uses: ./.github/workflows/build_docker_image.yaml
 
   release:
-    runs-on: $RUNS_ON_OS
+    runs-on: ubuntu-22.04
     uses: ./.github/workflows/create_github_release.yaml
