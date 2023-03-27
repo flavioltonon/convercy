@@ -1,19 +1,11 @@
-name: Development
-on:
-  push:
-    branches: *
-    branches-ignore: main
+name: Run tests
+on: workflow_call
 jobs:
-  setup:
-    runs-on: ubuntu-22.04
+  test:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
-  test:
-    runs-on: ubuntu-22.04
-    needs: setup
-    steps:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
@@ -24,4 +16,3 @@ jobs:
 
       - name: Run tests
         run: make tests
-

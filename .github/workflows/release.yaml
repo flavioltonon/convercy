@@ -1,75 +1,18 @@
-name: Release
+name: Make release
 on:
   push:
-    branches: feat/ci-release
+    branches: feat/ci-releasae
+env:
+  RUNS_ON_OS: ubuntu-22.04
 jobs:
-  setup:
-    environment: production
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
   test:
-    environment: production
-    runs-on: ubuntu-22.04
-    needs: setup
-    steps:
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.18
+    runs-on: $RUNS_ON_OS
+    uses: ${{ github.repository }}/.github/workflows/run_tests.yaml@${{ github.sha }}
 
-      - name: Install dependencies
-        run: make install
-
-      - name: Run tests
-        run: make tests
-  
   build:
-    environment: production
-    runs-on: ubuntu-22.04
-    needs: test
-    steps:
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
-      - name: Push image to registry
-        run: make image push
+    runs-on: $RUNS_ON_OS
+    uses: ${{ github.repository }}/.github/workflows/build_docker_image.yaml@${{ github.sha }}
 
   release:
-    environment: production
-    runs-on: ubuntu-22.04
-    needs: build
-    steps:
-      - name: Get latest release
-        id: get-latest-release
-        uses: pozetroninc/github-action-get-latest-release@v0.7.0
-        with:
-          repository: ${{ github.repository }}
-          token: ${{ github.token }}
-
-      - name: Increment release version
-        id: increment-release-version
-        uses: christian-draeger/increment-semantic-version@1.1.0
-        with:
-          current-version: ${{ steps.get-latest-release.outputs.release }}
-          version-fragment: feature
-
-      - name: Generate changelog
-        id: generate-changelog
-        uses: heinrichreimer/action-github-changelog-generator@v2.3
-        with:
-          token: ${{ github.token }}
-          sinceTag: ${{ steps.get-latest-release.outputs.release }}
-
-      - name: Create release
-        uses: ncipollo/release-action@v1.12.0
-        with:
-          tag: ${{ steps.increment-release-version.outputs.next-version }}
-          body: ${{ steps.generate-changelog.outputs.changelog }}
+    runs-on: $RUNS_ON_OS
+    uses: ${{ github.repository }}/.github/workflows/create_github_release.yaml@${{ github.sha }}
