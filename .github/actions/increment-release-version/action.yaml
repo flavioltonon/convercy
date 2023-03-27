@@ -43,5 +43,6 @@ runs:
         toTag: ${{ steps.increment-release-version.next-version }}
         token: ${{ inputs.github_token }}
 
-    - run: echo ${{ steps.increment-release-version.next-version }}
-    - run: echo ${{ steps.generate-changelog.outputs.changelog }}
+    - run: |
+      echo "next_version=${{ steps.increment-release-version.next-version }}" >> $GITHUB_OUTPUT
+      echo "changelog=${{ steps.generate-changelog.changelog }}" >> $GITHUB_OUTPUT
