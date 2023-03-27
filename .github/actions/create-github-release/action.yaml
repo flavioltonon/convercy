@@ -1,5 +1,8 @@
 name: Create GitHub release
 inputs:
+  changelog:
+    required: true
+    type: string
   github_token:
     required: true
     type: string
@@ -12,19 +15,9 @@ runs:
     - name: Check out repository
       uses: actions/checkout@v3
 
-    - name: Generate changelog
-      id: generate-changelog
-      uses: mikepenz/release-changelog-builder-action@v3.7.0
-      with:
-        fromTag: ${{ steps.get-latest-release.outputs.release }}
-        token: ${{ inputs.github_token }}
-
     - name: Create release
       uses: ncipollo/release-action@v1.12.0
       with:
         tag: ${{ inputs.release_version }}
-        body: |
-          # Changelog
-
-          ${{ steps.generate-changelog.outputs.changelog }}
+        body: ${{ inputs.changelog }}
 

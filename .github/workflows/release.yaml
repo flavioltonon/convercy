@@ -43,5 +43,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/create-github-release
         with:
+          changelog: ${{ needs.bump-version.outputs.changelog }}
           github_token: ${{ github.token }}
           release_version: ${{ needs.bump-version.outputs.next_version }}
