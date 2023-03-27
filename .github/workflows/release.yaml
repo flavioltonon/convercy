@@ -7,16 +7,16 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/workflows/run_tests.yaml
+      - uses: ./.github/actions/run_tests
   build:
     runs-on: ubuntu-22.04
     needs: test
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/workflows/build_docker_image.yaml
+      - uses: ./.github/actions/build_docker_image
   release:
     runs-on: ubuntu-22.04
     needs: build
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/workflows/create_github_release.yaml
+      - uses: ./.github/actions/create_github_release
