@@ -17,11 +17,14 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/increment-release-version
+      - id: increment-release-version
+        uses: ./.github/actions/increment-release-version
         with:
           github_repository: ${{ github.repository }}
           github_token: ${{ github.token }}
-      - run: echo ${{ needs.bump-version.outputs }}
+    outputs:
+      changelog: ${{ steps.increment-release-version.outputs.changelog }}
+      next_version: ${{ steps.increment-release-version.outputs.next_version }}
       
   # build:
   #   name: Build image
@@ -36,15 +39,15 @@ jobs:
   #         dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
   #         version: ${{ github.sha }}
 
-  # release:
-  #   name: Create release
-  #   runs-on: ubuntu-22.04
-  #   needs: bump-version
-  #   environment: production
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: ./.github/actions/create-github-release
-  #       with:
-  #         changelog: ${{ needs.bump-version.outputs.changelog }}
-  #         github_token: ${{ github.token }}
-  #         release_version: ${{ needs.bump-version.outputs.next_version }}
+  release:
+    name: Create release
+    runs-on: ubuntu-22.04
+    needs: bump-version
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/create-github-release
+        with:
+          changelog: ${{ needs.bump-version.outputs.changelog }}
+          github_token: ${{ github.token }}
+          release_version: ${{ needs.bump-version.outputs.next_version }}
