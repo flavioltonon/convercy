@@ -9,14 +9,14 @@ jobs:
     runs-on: $OS
     steps:
       - name: Run tests
-        uses: .github/workflows/run_tests.yaml
+        uses: ./.github/workflows/run_tests.yaml
   build:
     runs-on: $OS
     steps:
       - name: Build image
-        uses: .github/workflows/build_docker_image.yaml
+        uses: ./.github/workflows/build_docker_image.yaml
   release:
     runs-on: $OS
     steps:
       - name: Create release
-        uses: .github/workflows/create_github_release.yaml
+        uses: ./.github/workflows/create_github_release.yaml
