@@ -1,31 +1,36 @@
-ENVIRONMENT ?= development
-
 # build builds the application. It is intended to be executed only inside a Docker container context
 build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o ./build/bin/convercy ./cmd/main.go
+	@echo "Compiling the application..."
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o ./build/bin/convercy ./cmd/main.go
 
 check:
-	go vet ./...	
+	@echo "# Checking for suspicious, abnormal, or useless code..."
+	@go vet ./...
 
 image:
-	docker build --rm -f Dockerfile -t flavioltonon/convercy:latest .
+	@echo "# Building the application image..."
+	@docker build --rm -f Dockerfile -t flavioltonon/convercy:latest .
 
 install:
-	go mod tidy
+	@echo "# Installing dependencies..."
+	@go mod tidy
 
 push:
-	docker push flavioltonon/convercy:latest
-
-release: image push
+	@echo "# Pushing image to registry..."
+	@docker push flavioltonon/convercy:latest
 
 start: stop
-	docker-compose up --build
+	@echo "Initializing application and its dependencies..."
+	@docker-compose up --build
 
 stop:
-	docker-compose down --remove-orphans
+	@echo "Stopping application and its dependencies..."
+	@docker-compose down --remove-orphans
 
 tests:
-	go test -cover ./application/services/... ./domain/services/...
+	@echo "# Running tests..."
+	@go test -cover ./application/services/... ./domain/services/...
 
 tidy:
-	go fmt ./...
+	@echo "# Formatting code..."
+	@go fmt ./...
