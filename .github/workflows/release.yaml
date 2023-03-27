@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Run tests
-        uses: ./.github/workflows/run_tests.yaml
+        uses: ${{ github.repository }}/.github/workflows/run_tests.yaml@${{ github.sha }}
   build:
     runs-on: ubuntu-22.04
     needs: test
