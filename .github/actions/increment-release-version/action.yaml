@@ -32,9 +32,6 @@ runs:
       id: generate-changelog
       uses: mikepenz/release-changelog-builder-action@v3.7.0
       with:
-        fromTag: ${{ steps.get-latest-release.outputs.release }}
-        toTag: ${{ github.sha }}
-        token: ${{ github.token }}
         configurationJson: |
           {
             "template": "# Changelog\n\n${{CHANGELOG}}",
@@ -60,3 +57,6 @@ runs:
             "max_back_track_time_days": 365,
             "base_branches": ["main"]
           }
+        fromTag: ${{ steps.get-latest-release.outputs.release }}
+        toTag: ${{ github.sha }}
+        token: ${{ github.token }}
