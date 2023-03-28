@@ -40,7 +40,9 @@ jobs:
   release:
     name: Create release
     runs-on: ubuntu-22.04
-    needs: build
+    needs:
+      - bump-version
+      - build
     environment: production
     steps:
       - uses: actions/checkout@v3
