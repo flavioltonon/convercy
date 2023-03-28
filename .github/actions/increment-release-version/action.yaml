@@ -42,3 +42,4 @@ runs:
         fromTag: ${{ steps.get-latest-release.outputs.release }}
         toTag: ${{ steps.increment-release-version.outputs.next-version }}
         token: ${{ inputs.github_token }}
+
