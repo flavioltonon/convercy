@@ -35,4 +35,3 @@ runs:
         fromTag: ${{ steps.get-latest-release.outputs.release }}
         toTag: ${{ github.sha }}
         token: ${{ github.token }}
-
