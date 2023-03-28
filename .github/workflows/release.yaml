@@ -1,20 +1,20 @@
 name: Release
 on:
   push:
-    branches: feat/improve-release-changelog
+    branches: main
 jobs:
-  # test:
-  #   name: Run tests
-  #   runs-on: ubuntu-22.04
-  #   environment: production
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: ./.github/actions/run-tests
+  test:
+    name: Run tests
+    runs-on: ubuntu-22.04
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/run-tests
 
   bump-version:
     name: Bump version
     runs-on: ubuntu-22.04
-    # needs: test
+    needs: test
     environment: production
     steps:
       - uses: actions/checkout@v3
@@ -24,25 +24,25 @@ jobs:
       changelog: ${{ steps.increment-release-version.outputs.changelog }}
       next_version: ${{ steps.increment-release-version.outputs.next_version }}
       
-  # build:
-  #   name: Build image
-  #   runs-on: ubuntu-22.04
-  #   needs: bump-version
-  #   environment: production
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: ./.github/actions/build-docker-image
-  #       with:
-  #         dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #         dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
-  #         version: ${{ needs.bump-version.outputs.next_version }}
+  build:
+    name: Build image
+    runs-on: ubuntu-22.04
+    needs: bump-version
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/build-docker-image
+        with:
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
+          version: ${{ needs.bump-version.outputs.next_version }}
 
   release:
     name: Create release
     runs-on: ubuntu-22.04
     needs:
       - bump-version
-      # - build
+      - build
     environment: production
     steps:
       - uses: actions/checkout@v3
