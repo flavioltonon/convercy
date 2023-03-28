@@ -1,32 +1,52 @@
-name: Make release
+name: Release
 on:
   push:
     branches: main
 jobs:
   test:
+    name: Run tests
     runs-on: ubuntu-22.04
     environment: production
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/run_tests
-  build:
+      - uses: ./.github/actions/run-tests
+
+  bump-version:
+    name: Bump version
     runs-on: ubuntu-22.04
     needs: test
     environment: production
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/build_docker_image
-        with:
-          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
-          version: ${{ github.ref }}
-  release:
+      - id: increment-release-version
+        uses: ./.github/actions/increment-release-version
+    outputs:
+      changelog: ${{ steps.increment-release-version.outputs.changelog }}
+      next_version: ${{ steps.increment-release-version.outputs.next_version }}
+      
+  build:
+    name: Build image
     runs-on: ubuntu-22.04
-    needs: build
+    needs: bump-version
     environment: production
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/create_github_release
+      - uses: ./.github/actions/build-docker-image
         with:
-          github_repository: ${{ github.repository }}
-          github_token: ${{ github.token }}
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
+          version: ${{ needs.bump-version.outputs.next_version }}
+
+  release:
+    name: Create release
+    runs-on: ubuntu-22.04
+    needs:
+      - bump-version
+      - build
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/create-github-release
+        with:
+          changelog: ${{ needs.bump-version.outputs.changelog }}
+          release_version: ${{ needs.bump-version.outputs.next_version }}
