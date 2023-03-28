@@ -32,6 +32,31 @@ runs:
       id: generate-changelog
       uses: mikepenz/release-changelog-builder-action@v3.7.0
       with:
+        configurationJson: |
+          {
+            "template": "# Changelog\n\n#{{CHANGELOG}}",
+            "categories": [
+              {
+                "title": "## 🚀 Features",
+                "labels": ["feature", "enhancement"]
+              },
+              {
+                "title": "## 🐛 Fixes",
+                "labels": ["fix", "bug"]
+              },
+              {
+                "title": "## 🧪 Tests",
+                "labels": ["test"]
+              }
+            ],
+            "sort": {
+              "order": "DESC",
+              "on_property": "mergedAt"
+            },
+            "max_pull_requests": 1000,
+            "max_back_track_time_days": 365,
+            "base_branches": ["main"]
+          }
         fromTag: ${{ steps.get-latest-release.outputs.release }}
         toTag: ${{ github.sha }}
         token: ${{ github.token }}
