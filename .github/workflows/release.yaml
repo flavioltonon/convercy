@@ -35,7 +35,7 @@ jobs:
         with:
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
-          version: ${{ steps.increment-release-version.outputs.next_version }}
+          version: ${{ needs.bump-version.outputs.next_version }}
 
   release:
     name: Create release
