@@ -23,7 +23,7 @@ jobs:
     outputs:
       changelog: ${{ steps.increment-release-version.outputs.changelog }}
       next_version: ${{ steps.increment-release-version.outputs.next_version }}
-      
+
   build:
     name: Build image
     runs-on: ubuntu-22.04
