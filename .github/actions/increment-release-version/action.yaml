@@ -2,7 +2,7 @@ name: Increment release version
 outputs:
   next_version:
     description: The incremented release version
-    value: ${{ steps.increment-release-version.outputs.next-version }}
+    value: ${{ steps.increment-release-version.outputs.next }}
   changelog:
     description: Changelog of the changes between the current and the next versions
     value: ${{ steps.generate-changelog.outputs.changelog }}
@@ -23,10 +23,10 @@ runs:
 
     - name: Increment release version
       id: increment-release-version
-      uses: christian-draeger/increment-semantic-version@1.1.0
+      uses: ietf-tools/semver-action@v1
       with:
-        current-version: ${{ steps.get-latest-release.outputs.release }}
-        version-fragment: feature
+        token: ${{ github.token }}
+        branch: main
 
     - name: Generate changelog
       id: generate-changelog
