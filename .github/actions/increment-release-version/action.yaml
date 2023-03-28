@@ -1,11 +1,4 @@
 name: Increment release version
-inputs:
-  github_repository:
-    required: true
-    type: string
-  github_token:
-    required: true
-    type: string
 outputs:
   next_version:
     description: The incremented release version
@@ -25,7 +18,7 @@ runs:
       id: get-latest-release
       uses: pozetroninc/github-action-get-latest-release@v0.7.0
       with:
-        repository: ${{ inputs.github_repository }}
+        repository: ${{ github.repository }}
         token: ${{ github.token }}
 
     - name: Increment release version
@@ -40,6 +33,6 @@ runs:
       uses: mikepenz/release-changelog-builder-action@v3.7.0
       with:
         fromTag: ${{ steps.get-latest-release.outputs.release }}
-        toTag: ${{ steps.increment-release-version.outputs.next-version }}
-        token: ${{ inputs.github_token }}
+        toTag: ${{ github.sha }}
+        token: ${{ github.token }}
 

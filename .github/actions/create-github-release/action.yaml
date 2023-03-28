@@ -3,9 +3,6 @@ inputs:
   changelog:
     required: true
     type: string
-  github_token:
-    required: true
-    type: string
   release_version:
     required: true
     type: string
