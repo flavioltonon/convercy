@@ -9,7 +9,7 @@ inputs:
 outputs:
   next_version:
     description: The incremented release version
-    value: ${{ steps.increment-release-version.next-version }}
+    value: ${{ steps.increment-release-version.outputs.next-version }}
   changelog:
     description: Changelog of the changes between the current and the next versions
     value: ${{ steps.generate-changelog.outputs.changelog }}
@@ -42,7 +42,3 @@ runs:
         fromTag: ${{ steps.get-latest-release.release }}
         toTag: ${{ steps.increment-release-version.next-version }}
         token: ${{ inputs.github_token }}
-
-    - run: |
-      echo "next_version=${{ steps.increment-release-version.next-version }}" >> $GITHUB_OUTPUT
-      echo "changelog=${{ steps.generate-changelog.changelog }}" >> $GITHUB_OUTPUT
