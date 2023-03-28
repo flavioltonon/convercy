@@ -51,4 +51,5 @@ Diagramas de sequência dos fluxos da aplicação podem ser encontrados no diret
 
 - [ ] Adicionar camada de cache para reduzir a quantidade de chamadas para a API de taxas de câmbio da OpenExchangeRates (https://openexchangerates.org)
 - [ ] Adicionar camada de autenticação para controlar o gerenciamento de moedas registradas por client
-- [x] Adicionar pipeline de CI para testar alterações feitas na branch main e publicar imagens Docker quando uma release for criada
+- [x] Adicionar pipeline de CI para testar alterações feitas na branch main, publicando imagens Docker atualizadas e criando novas releases automaticamente
+- [x] Adicionar pipeline de CI para testar alterações feitas em pull requests antes que elas sejam mergeadas na branch main
