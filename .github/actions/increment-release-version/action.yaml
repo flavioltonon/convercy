@@ -39,14 +39,15 @@ runs:
             "categories": [
               {
                 "title": "## 🚀 Features",
-                "labels": ["feature", "enhancement"]
+                "labels": ["feature"]
               },
               {
                 "title": "## 🐛 Fixes",
-                "labels": ["fix", "bug"]
+                "labels": ["fix"]
               },
               {
                 "title": "## 🧪 Tests",
+                "labels": ["test", "tests"]
               },
               {
                 "title": "## 💬 Others",
