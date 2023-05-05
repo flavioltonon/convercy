@@ -1,6 +1,5 @@
-# Warning, do not check out untrusted code with
-# the pull_request_target event.
-name: Label Pull Request
+# This workflow sets labels on pull requests with names that follow Conventional Commits conventions
+name: Pull Request Labeler
 on:
   pull_request_target:
     types: [ opened, edited ]
