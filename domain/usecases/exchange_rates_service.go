@@ -2,7 +2,7 @@ package usecases
 
 import "convercy/domain/valueobject"
 
-// CurrencyExchangeRatesService is a service capable of providing all known exchange rates
+// ExchangeRatesService is a service capable of providing all known exchange rates
 //
 //go:generate mockery --name ExchangeRatesService
 type ExchangeRatesService interface {
