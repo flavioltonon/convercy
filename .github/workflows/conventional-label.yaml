@@ -10,10 +10,5 @@ jobs:
     steps:
       - uses: bcoe/conventional-release-labels@v1.3.0
         with:
-          type_labels:
-            feat: "feature"
-            fix: "fix"
-            docs: "documentation"
-            test: "tests"
-            tests: "tests"
+          type_labels: {"feat": "feature", "fix": "fix", "docs": "documentation", "test": "tests", "tests": "tests"}
           ignored_types: []
