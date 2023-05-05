@@ -12,7 +12,7 @@ jobs:
         with:
           type_labels:
             feat: "feature"
-            fix": "fix"
+            fix: "fix"
             docs: "documentation"
             test: "tests"
             tests: "tests"
