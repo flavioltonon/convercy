@@ -35,7 +35,7 @@ runs:
       with:
         configurationJson: |
           {
-            "template": "# Changelog\n\n#{{CHANGELOG}}\n\n## Others\n\n#{{UNCATEGORIZED}}",
+            "template": "# Changelog\n\n#{{CHANGELOG}}",
             "categories": [
               {
                 "title": "## 🚀 Features",
