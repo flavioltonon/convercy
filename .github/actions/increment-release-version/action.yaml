@@ -27,6 +27,7 @@ runs:
       with:
         token: ${{ github.token }}
         branch: main
+        patchList: "fix, chore, perf, refactor, test, tests"
 
     - name: Generate changelog
       id: generate-changelog
