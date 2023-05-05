@@ -47,7 +47,10 @@ runs:
               },
               {
                 "title": "## 🧪 Tests",
-                "labels": ["test"]
+              },
+              {
+                "title": "## 💬 Others",
+                "labels": ["chore", "documentation"]
               }
             ],
             "sort": {
