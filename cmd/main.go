@@ -16,9 +16,8 @@ import (
 	applicationServices "convercy/application/services"
 	domainServices "convercy/domain/services"
 	"convercy/infrastructure/logging/zap"
-	"convercy/infrastructure/openexchangerates"
 	"convercy/infrastructure/repository/mongodb"
-	"convercy/infrastructure/repository/mongodb/mappers"
+	"convercy/infrastructure/repository/openexchangerates"
 	"convercy/shared/logging"
 
 	"github.com/gorilla/mux"
