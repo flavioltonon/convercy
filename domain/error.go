@@ -50,6 +50,12 @@ func ErrCurrencyNotRegistered() error {
 	}
 }
 
+func ErrCurrencyExchangeRatesNotFound() error {
+	return ErrNotFound{
+		message: "currrency exchange rates not found",
+	}
+}
+
 func ErrExchangeRateNotFound() error {
 	return ErrNotFound{
 		message: "exchange rate not found",
@@ -98,6 +104,12 @@ func ErrInvalidCurrencyCode(cause error) error {
 	}
 }
 
+func ErrCurrencyCodeNotRegistered(code string) error {
+	return ErrValidationFailure{
+		message: fmt.Sprintf("currency code %s not registered", code),
+	}
+}
+
 func ErrInvalidCurrency(cause error) error {
 	return ErrValidationFailure{
 		message: fmt.Sprintf("invalid currency: %v", cause),
@@ -107,5 +119,11 @@ func ErrInvalidCurrency(cause error) error {
 func ErrInvalidMoney(cause error) error {
 	return ErrValidationFailure{
 		message: fmt.Sprintf("invalid money: %v", cause),
+	}
+}
+
+func ErrUnsupportedBaseCurrencyCode(code string) error {
+	return ErrValidationFailure{
+		message: fmt.Sprintf("unsupported base currency code: %s", code),
 	}
 }

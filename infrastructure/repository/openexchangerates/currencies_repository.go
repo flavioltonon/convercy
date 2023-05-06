@@ -2,16 +2,16 @@ package openexchangerates
 
 import "convercy/domain/valueobject"
 
-// CurrenciesService is an implementation of usecases.CurrenciesService interface
-type CurrenciesService struct {
+// CurrenciesRepository is an implementation of usecases.CurrenciesRepository interface
+type CurrenciesRepository struct {
 	client *Client
 }
 
-func NewCurrenciesService(client *Client) *CurrenciesService {
-	return &CurrenciesService{client: client}
+func NewCurrenciesRepository(client *Client) *CurrenciesRepository {
+	return &CurrenciesRepository{client: client}
 }
 
-func (s *CurrenciesService) ListCurrencyCodes() (valueobject.CurrencyCodes, error) {
+func (s *CurrenciesRepository) ListCurrencyCodes() (valueobject.CurrencyCodes, error) {
 	response, err := s.client.GetCurrencies()
 	if err != nil {
 		return nil, err

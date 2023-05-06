@@ -8,18 +8,20 @@ import (
 	"convercy/domain"
 	"convercy/domain/aggregate"
 	"convercy/domain/entity"
-	"convercy/domain/usecases"
 	"convercy/domain/valueobject"
 )
 
 type CurrencyRegistrationService struct {
-	currencyCodeValidator          usecases.CurrencyCodeValidationService
+	currenciesRepository           repositories.CurrenciesRepository
 	registeredCurrenciesRepository repositories.RegisteredCurrenciesRepository
 }
 
-func NewCurrencyRegistrationService(currencyCodeValidator usecases.CurrencyCodeValidationService, registeredCurrenciesRepository repositories.RegisteredCurrenciesRepository) *CurrencyRegistrationService {
+func NewCurrencyRegistrationService(
+	currenciesRepository repositories.CurrenciesRepository,
+	registeredCurrenciesRepository repositories.RegisteredCurrenciesRepository,
+) *CurrencyRegistrationService {
 	return &CurrencyRegistrationService{
-		currencyCodeValidator:          currencyCodeValidator,
+		currenciesRepository:           currenciesRepository,
 		registeredCurrenciesRepository: registeredCurrenciesRepository,
 	}
 }
@@ -31,8 +33,13 @@ func (s *CurrencyRegistrationService) RegisterCurrency(request dto.RegisterCurre
 		return dto.RegisterCurrencyResponse{}, err
 	}
 
-	if err := s.currencyCodeValidator.ValidateCurrencyCode(code); err != nil {
+	allCurrencyCodes, err := s.currenciesRepository.ListCurrencyCodes()
+	if err != nil {
 		return dto.RegisterCurrencyResponse{}, err
+	}
+
+	if !allCurrencyCodes.Contains(code) {
+		return dto.RegisterCurrencyResponse{}, domain.ErrCurrencyCodeNotFound()
 	}
 
 	// At this point, NewCurrency can never return an error because all other data has already been validated or is being generated systemically

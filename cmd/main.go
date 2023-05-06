@@ -15,10 +15,13 @@ import (
 	"convercy/application/http/middleware"
 	applicationServices "convercy/application/services"
 	domainServices "convercy/domain/services"
+	"convercy/domain/valueobject"
 	"convercy/infrastructure/logging/zap"
-	"convercy/infrastructure/openexchangerates"
 	"convercy/infrastructure/repository/mongodb"
-	"convercy/infrastructure/repository/mongodb/mappers"
+	mongodbMappers "convercy/infrastructure/repository/mongodb/mappers"
+	"convercy/infrastructure/repository/openexchangerates"
+	"convercy/infrastructure/repository/redis"
+	redisMappers "convercy/infrastructure/repository/redis/mappers"
 	"convercy/shared/logging"
 
 	"github.com/gorilla/mux"
@@ -51,18 +54,36 @@ func main() {
 
 	defer repository.Disconnect()
 
+	cache, err := redis.NewCache(&redis.Options{
+		Address:           config.Cache.Address,
+		ConnectionTimeout: config.Cache.ConnectionTimeout,
+	})
+	if err != nil {
+		logger.Fatal("failed to create cache", logging.Error(err))
+	}
+
 	var (
-		openExchangeRatesClient                = openexchangerates.NewClient(http.DefaultClient, config.OpenExchangeRates.AppID, config.OpenExchangeRates.BaseURL)
-		currenciesService                      = openexchangerates.NewCurrenciesService(openExchangeRatesClient)
-		exchangeRatesService                   = openexchangerates.NewExchangeRatesService(openExchangeRatesClient)
-		currencyCodeValidationService          = domainServices.NewCurrencyCodeValidationService(currenciesService)
-		currencyExchangeRatesService           = domainServices.NewCurrencyExchangeRatesService(exchangeRatesService)
-		currencyConversionDomainService        = domainServices.NewCurrencyConversionService()
-		currencyMapper                         = mappers.NewCurrencyMapper()
-		registeredCurrenciesMapper             = mappers.NewRegisteredCurrenciesMapper(currencyMapper)
-		currenciesRepository                   = mongodb.NewCurrenciesRepository(registeredCurrenciesMapper, repository)
-		currencyConversionApplicationService   = applicationServices.NewCurrencyConversionService(currencyCodeValidationService, currencyConversionDomainService, currenciesRepository, currencyExchangeRatesService)
-		currencyRegistrationApplicationService = applicationServices.NewCurrencyRegistrationService(currencyCodeValidationService, currenciesRepository)
+		baselineCurrencyCode, _              = valueobject.NewCurrencyCode("USD")
+		openExchangeRatesClient              = openexchangerates.NewClient(http.DefaultClient, config.OpenExchangeRates.AppID, config.OpenExchangeRates.BaseURL)
+		currenciesRepository                 = openexchangerates.NewCurrenciesRepository(openExchangeRatesClient)
+		exchangeRateUnitsMapper              = redisMappers.NewExchangeRateUnitsMapper()
+		exchangeRatesMapper                  = redisMappers.NewExchangeRatesMapper(exchangeRateUnitsMapper)
+		currencyExchangeRatesMapper          = redisMappers.NewCurrencyExchangeRatesMapper(exchangeRatesMapper)
+		currencyExchangeRatesCache           = redis.NewCurrencyExchangeRatesCache(currencyExchangeRatesMapper, cache, config.Cache.CurrencyExchangeRates.TTL)
+		currencyExchangeRatesRepository      = openexchangerates.NewCurrencyExchangeRatesRepository(openExchangeRatesClient)
+		currencyConversionDomainService      = domainServices.NewCurrencyConversionService()
+		currencyMapper                       = mongodbMappers.NewCurrencyMapper()
+		registeredCurrenciesMapper           = mongodbMappers.NewRegisteredCurrenciesMapper(currencyMapper)
+		registeredCurrenciesRepository       = mongodb.NewRegisteredCurrenciesRepository(registeredCurrenciesMapper, repository)
+		currencyConversionApplicationService = applicationServices.NewCurrencyConversionService(
+			baselineCurrencyCode,
+			currenciesRepository,
+			currencyConversionDomainService,
+			currencyExchangeRatesCache,
+			currencyExchangeRatesRepository,
+			registeredCurrenciesRepository,
+		)
+		currencyRegistrationApplicationService = applicationServices.NewCurrencyRegistrationService(currenciesRepository, registeredCurrenciesRepository)
 		backofficeCurrencyController           = backoffice.NewCurrencyController(currencyRegistrationApplicationService, logger)
 		userCurrencyController                 = user.NewCurrencyController(currencyConversionApplicationService, logger)
 	)

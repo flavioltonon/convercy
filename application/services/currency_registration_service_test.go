@@ -1,17 +1,16 @@
 package services
 
 import (
+	"errors"
+	"testing"
+
 	"convercy/application/dto"
 	"convercy/application/repositories"
 	repositoriesMocks "convercy/application/repositories/mocks"
 	"convercy/domain"
 	"convercy/domain/aggregate"
 	"convercy/domain/entity"
-	"convercy/domain/usecases"
-	domainUsecasesMocks "convercy/domain/usecases/mocks"
 	"convercy/domain/valueobject"
-	"errors"
-	"testing"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -64,7 +63,7 @@ func TestCurrencyRegistrationServiceTestSuite(t *testing.T) {
 
 func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_RegisterCurrency() {
 	type fields struct {
-		currencyCodeValidationService  func() usecases.CurrencyCodeValidationService
+		currenciesRepository           func() repositories.CurrenciesRepository
 		registeredCurrenciesRepository func() repositories.RegisteredCurrenciesRepository
 	}
 
@@ -82,8 +81,8 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_R
 		{
 			name: "When the input request.Code is not valid, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					return domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					return repositoriesMocks.NewCurrenciesRepository(s.T())
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
 					return repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
@@ -97,11 +96,30 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_R
 			wantErr: true,
 		},
 		{
+			name: "When the CurrenciesRepository fails to fetch currencies, an error should be returned",
+			fields: fields{
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(nil, errors.New("some error"))
+					return mock
+				},
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					return repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+				},
+			},
+			args: args{
+				request: dto.RegisterCurrencyRequest{
+					Code: "FOO",
+				},
+			},
+			wantErr: true,
+		},
+		{
 			name: "When the parsed CurrencyCode is not valid, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.invalid.currencyCode).Return(domain.ErrCurrencyCodeNotFound())
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.brl.currencyCode}, nil)
 					return mock
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
@@ -118,9 +136,9 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_R
 		{
 			name: "When the search for registered currencies fails (except for domain.ErrNotFound errors), an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.brl.currencyCode).Return(nil)
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.brl.currencyCode}, nil)
 					return mock
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
@@ -139,9 +157,9 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_R
 		{
 			name: "When the parsed currency code has already been registered, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.brl.currencyCode).Return(nil)
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.brl.currencyCode}, nil)
 					return mock
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
@@ -160,9 +178,9 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_R
 		{
 			name: "When the persistence of the updated registered currencies fail, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.usd.currencyCode).Return(nil)
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.usd.currencyCode}, nil)
 					return mock
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
@@ -183,9 +201,9 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_R
 		{
 			name: "When everything works as intended and everything is valid (WOW), no errors should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.usd.currencyCode).Return(nil)
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.usd.currencyCode}, nil)
 					return mock
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
@@ -206,9 +224,9 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_R
 		{
 			name: "When no RegisteredCurrencies are found, an empty one should be created and no errors should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.usd.currencyCode).Return(nil)
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.usd.currencyCode}, nil)
 					return mock
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
@@ -230,7 +248,7 @@ func (s *CurrencyRegistrationServiceTestSuite) TestCurrencyRegistrationService_R
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
 			service := &CurrencyRegistrationService{
-				currencyCodeValidator:          tt.fields.currencyCodeValidationService(),
+				currenciesRepository:           tt.fields.currenciesRepository(),
 				registeredCurrenciesRepository: tt.fields.registeredCurrenciesRepository(),
 			}
 			_, err := service.RegisterCurrency(tt.args.request)

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"testing"
 
 	"convercy/application/dto"
@@ -10,8 +11,6 @@ import (
 	"convercy/domain/aggregate"
 	"convercy/domain/entity"
 	"convercy/domain/services"
-	"convercy/domain/usecases"
-	domainUsecasesMocks "convercy/domain/usecases/mocks"
 	"convercy/domain/valueobject"
 
 	"github.com/stretchr/testify/suite"
@@ -51,8 +50,13 @@ type CurrencyConversionServiceTestSuite struct {
 		brlGbp valueobject.ExchangeRate
 		usdBrl valueobject.ExchangeRate
 		usdGbp valueobject.ExchangeRate
+		usdUsd valueobject.ExchangeRate
 		gbpBrl valueobject.ExchangeRate
 		gbpUsd valueobject.ExchangeRate
+	}
+
+	currencyExchangeRates struct {
+		usd *aggregate.CurrencyExchangeRates
 	}
 
 	registeredCurrencies *aggregate.RegisteredCurrencies
@@ -78,8 +82,13 @@ func (s *CurrencyConversionServiceTestSuite) SetupSuite() {
 	s.exchangeRates.brlGbp, _ = valueobject.NewExchangeRate(0.10069, "BRL", "GBP")
 	s.exchangeRates.usdBrl, _ = valueobject.NewExchangeRate(5.1652, "USD", "BRL")
 	s.exchangeRates.usdGbp, _ = valueobject.NewExchangeRate(0.838732, "USD", "GBP")
+	s.exchangeRates.usdUsd, _ = valueobject.NewExchangeRate(1, "USD", "USD")
 	s.exchangeRates.gbpBrl, _ = valueobject.NewExchangeRate(9.931458, "GBP", "BRL")
 	s.exchangeRates.gbpUsd, _ = valueobject.NewExchangeRate(1.92276, "GBP", "USD")
+
+	s.currencyExchangeRates.usd, _ = aggregate.NewCurrencyExchangeRates(
+		s.currencies.usd.currencyCode,
+		s.exchangeRates.usdBrl, s.exchangeRates.usdUsd)
 
 	s.registeredCurrencies = aggregate.NewRegisteredCurrencies(s.clientID, s.currencies.brl.currency, s.currencies.usd.currency)
 }
@@ -90,10 +99,12 @@ func TestCurrencyConversionServiceTestSuite(t *testing.T) {
 
 func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_ConvertCurrency() {
 	type fields struct {
-		currencyCodeValidationService  func() usecases.CurrencyCodeValidationService
-		currencyConversionService      func() usecases.CurrencyConversionService
-		registeredCurrenciesRepository func() repositories.RegisteredCurrenciesRepository
-		currencyExchangeRatesService   func() usecases.CurrencyExchangeRatesService
+		baselineCurrencyCode            func() valueobject.CurrencyCode
+		currenciesRepository            func() repositories.CurrenciesRepository
+		currencyConversionService       func() *services.CurrencyConversionService
+		currencyExchangeRatesCache      func() repositories.CurrencyExchangeRatesCache
+		currencyExchangeRatesRepository func() repositories.CurrencyExchangeRatesRepository
+		registeredCurrenciesRepository  func() repositories.RegisteredCurrenciesRepository
 	}
 
 	type args struct {
@@ -110,17 +121,23 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 		{
 			name: "When the input request.Amount is not valid, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					return domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					return repositoriesMocks.NewCurrenciesRepository(s.T())
+				},
+				currencyConversionService: func() *services.CurrencyConversionService {
+					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					return repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					return repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
 					return repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
-				},
-				currencyExchangeRatesService: func() usecases.CurrencyExchangeRatesService {
-					return domainUsecasesMocks.NewCurrencyExchangeRatesService(s.T())
-				},
-				currencyConversionService: func() usecases.CurrencyConversionService {
-					return services.NewCurrencyConversionService()
 				},
 			},
 			args: args{
@@ -133,17 +150,23 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 		{
 			name: "When the input request.Code is not valid, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					return domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					return repositoriesMocks.NewCurrenciesRepository(s.T())
+				},
+				currencyConversionService: func() *services.CurrencyConversionService {
+					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					return repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					return repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
 					return repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
-				},
-				currencyExchangeRatesService: func() usecases.CurrencyExchangeRatesService {
-					return domainUsecasesMocks.NewCurrencyExchangeRatesService(s.T())
-				},
-				currencyConversionService: func() usecases.CurrencyConversionService {
-					return services.NewCurrencyConversionService()
 				},
 			},
 			args: args{
@@ -155,21 +178,59 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 			wantErr: true,
 		},
 		{
-			name: "When the parsed CurrencyCode is not valid, an error should be returned",
+			name: "When the CurrenciesRepository fails to fetch currencies, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.invalid.currencyCode).Return(domain.ErrCurrencyCodeNotFound())
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(nil, errors.New("some error"))
 					return mock
+				},
+				currencyConversionService: func() *services.CurrencyConversionService {
+					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					return repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					return repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
 					return repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
 				},
-				currencyExchangeRatesService: func() usecases.CurrencyExchangeRatesService {
-					return domainUsecasesMocks.NewCurrencyExchangeRatesService(s.T())
+			},
+			args: args{
+				request: dto.ConvertCurrencyRequest{
+					Amount: 10,
+					Code:   "FOO",
 				},
-				currencyConversionService: func() usecases.CurrencyConversionService {
+			},
+			wantErr: true,
+		},
+		{
+			name: "When the parsed CurrencyCode is not valid, an error should be returned",
+			fields: fields{
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.brl.currencyCode}, nil)
+					return mock
+				},
+				currencyConversionService: func() *services.CurrencyConversionService {
 					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					return repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					return repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
+				},
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					return repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
 				},
 			},
 			args: args{
@@ -183,21 +244,27 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 		{
 			name: "When no currencies have been registered yet, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.brl.currencyCode).Return(nil)
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.brl.currencyCode}, nil)
 					return mock
+				},
+				currencyConversionService: func() *services.CurrencyConversionService {
+					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					return repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					return repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
 					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
 					mock.On("GetRegisteredCurrencies").Return(nil, domain.ErrRegisteredCurrenciesNotFound())
 					return mock
-				},
-				currencyExchangeRatesService: func() usecases.CurrencyExchangeRatesService {
-					return domainUsecasesMocks.NewCurrencyExchangeRatesService(s.T())
-				},
-				currencyConversionService: func() usecases.CurrencyConversionService {
-					return services.NewCurrencyConversionService()
 				},
 			},
 			args: args{
@@ -211,21 +278,27 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 		{
 			name: "When the parsed currency code has not been registered yet, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.gbp.currencyCode).Return(nil)
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.gbp.currencyCode}, nil)
 					return mock
+				},
+				currencyConversionService: func() *services.CurrencyConversionService {
+					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					return repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					return repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
 					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
 					mock.On("GetRegisteredCurrencies").Return(s.registeredCurrencies, nil)
 					return mock
-				},
-				currencyExchangeRatesService: func() usecases.CurrencyExchangeRatesService {
-					return domainUsecasesMocks.NewCurrencyExchangeRatesService(s.T())
-				},
-				currencyConversionService: func() usecases.CurrencyConversionService {
-					return services.NewCurrencyConversionService()
 				},
 			},
 			args: args{
@@ -237,25 +310,33 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 			wantErr: true,
 		},
 		{
-			name: "When CurrencyExchangeRatesService.ListCurrencyExchangeRates fails to list exchange rates for a currency, an error should be returned",
+			name: "When ExchangeRatesService.ListExchangeRates fails to list exchange rates for a currency, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.brl.currencyCode).Return(nil)
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.brl.currencyCode}, nil)
+					return mock
+				},
+				currencyConversionService: func() *services.CurrencyConversionService {
+					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					mock := repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+					mock.On("GetCurrencyExchangeRates", s.currencies.usd.currencyCode).Return(nil, errors.New("some error"))
+					return mock
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					mock := repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
+					mock.On("GetCurrencyExchangeRates", s.currencies.usd.currencyCode).Return(nil, domain.ErrExchangeRateNotFound())
 					return mock
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
 					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
 					mock.On("GetRegisteredCurrencies").Return(s.registeredCurrencies, nil)
 					return mock
-				},
-				currencyExchangeRatesService: func() usecases.CurrencyExchangeRatesService {
-					mock := domainUsecasesMocks.NewCurrencyExchangeRatesService(s.T())
-					mock.On("ListCurrencyExchangeRates", s.currencies.brl.currency).Return(nil, domain.ErrExchangeRateNotFound())
-					return mock
-				},
-				currencyConversionService: func() usecases.CurrencyConversionService {
-					return services.NewCurrencyConversionService()
 				},
 			},
 			args: args{
@@ -269,23 +350,31 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 		{
 			name: "When CurrencyConversionService.ConvertCurrency fails to convert an amount of currency, an error should be returned",
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.brl.currencyCode).Return(nil)
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.brl.currencyCode}, nil)
+					return mock
+				},
+				currencyConversionService: func() *services.CurrencyConversionService {
+					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					mock := repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+					mock.On("GetCurrencyExchangeRates", s.currencies.usd.currencyCode).Return(nil, domain.ErrCurrencyExchangeRatesNotFound())
+					return mock
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					mock := repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
+					mock.On("GetCurrencyExchangeRates", s.currencies.usd.currencyCode).Return(nil, domain.ErrExchangeRateNotFound())
 					return mock
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
 					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
 					mock.On("GetRegisteredCurrencies").Return(s.registeredCurrencies, nil)
 					return mock
-				},
-				currencyExchangeRatesService: func() usecases.CurrencyExchangeRatesService {
-					mock := domainUsecasesMocks.NewCurrencyExchangeRatesService(s.T())
-					mock.On("ListCurrencyExchangeRates", s.currencies.brl.currency).Return(nil, domain.ErrExchangeRateNotFound())
-					return mock
-				},
-				currencyConversionService: func() usecases.CurrencyConversionService {
-					return services.NewCurrencyConversionService()
 				},
 			},
 			args: args{
@@ -297,12 +386,29 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 			wantErr: true,
 		},
 		{
-			name: `When everything works as intended and everything is valid (WOW), a ConvertCurrencyResponse should be returned with a set of 
+			name: `When everything works as intended and everything is valid (WOW), a ConvertCurrencyResponse should be returned with a set of
 			exchange rates for the input currency`,
 			fields: fields{
-				currencyCodeValidationService: func() usecases.CurrencyCodeValidationService {
-					mock := domainUsecasesMocks.NewCurrencyCodeValidationService(s.T())
-					mock.On("ValidateCurrencyCode", s.currencies.brl.currencyCode).Return(nil)
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.brl.currencyCode}, nil)
+					return mock
+				},
+				currencyConversionService: func() *services.CurrencyConversionService {
+					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					m := repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+					m.On("GetCurrencyExchangeRates", s.currencies.usd.currencyCode).Return(nil, domain.ErrCurrencyExchangeRatesNotFound()).Once()
+					m.On("SaveCurrencyExchangeRates", s.currencyExchangeRates.usd).Return(nil).Once()
+					return m
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					mock := repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
+					mock.On("GetCurrencyExchangeRates", s.currencies.usd.currencyCode).Return(s.currencyExchangeRates.usd, nil)
 					return mock
 				},
 				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
@@ -310,15 +416,46 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 					mock.On("GetRegisteredCurrencies").Return(s.registeredCurrencies, nil)
 					return mock
 				},
-				currencyExchangeRatesService: func() usecases.CurrencyExchangeRatesService {
-					mock := domainUsecasesMocks.NewCurrencyExchangeRatesService(s.T())
-					mock.On("ListCurrencyExchangeRates", s.currencies.brl.currency).Return(valueobject.ExchangeRates{
-						s.exchangeRates.brlUsd,
-					}, nil)
+			},
+			args: args{
+				request: dto.ConvertCurrencyRequest{
+					Amount: 10,
+					Code:   "BRL",
+				},
+			},
+			want: dto.ConvertCurrencyResponse{
+				"USD": 1.94,
+			},
+			wantErr: false,
+		},
+		{
+			name: `When everything works as intended and everything is valid after a CurrencyExchangeRatesCache cache hit, a ConvertCurrencyResponse should be returned
+				with a set of exchange rates for the input currency`,
+			fields: fields{
+				baselineCurrencyCode: func() valueobject.CurrencyCode {
+					return s.currencies.usd.currencyCode
+				},
+				currenciesRepository: func() repositories.CurrenciesRepository {
+					mock := repositoriesMocks.NewCurrenciesRepository(s.T())
+					mock.On("ListCurrencyCodes").Return(valueobject.CurrencyCodes{s.currencies.brl.currencyCode}, nil)
 					return mock
 				},
-				currencyConversionService: func() usecases.CurrencyConversionService {
+				currencyConversionService: func() *services.CurrencyConversionService {
 					return services.NewCurrencyConversionService()
+				},
+				currencyExchangeRatesCache: func() repositories.CurrencyExchangeRatesCache {
+					m := repositoriesMocks.NewCurrencyExchangeRatesCache(s.T())
+					m.On("GetCurrencyExchangeRates", s.currencies.usd.currencyCode).Return(s.currencyExchangeRates.usd, nil)
+					return m
+				},
+				currencyExchangeRatesRepository: func() repositories.CurrencyExchangeRatesRepository {
+					mock := repositoriesMocks.NewCurrencyExchangeRatesRepository(s.T())
+					return mock
+				},
+				registeredCurrenciesRepository: func() repositories.RegisteredCurrenciesRepository {
+					mock := repositoriesMocks.NewRegisteredCurrenciesRepository(s.T())
+					mock.On("GetRegisteredCurrencies").Return(s.registeredCurrencies, nil)
+					return mock
 				},
 			},
 			args: args{
@@ -337,14 +474,19 @@ func (s *CurrencyConversionServiceTestSuite) TestCurrencyConversionService_Conve
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
 			service := &CurrencyConversionService{
-				currencyCodeValidationService:  tt.fields.currencyCodeValidationService(),
-				currencyConversionService:      tt.fields.currencyConversionService(),
-				registeredCurrenciesRepository: tt.fields.registeredCurrenciesRepository(),
-				currencyExchangeRatesService:   tt.fields.currencyExchangeRatesService(),
+				baselineCurrencyCode:            tt.fields.baselineCurrencyCode(),
+				currenciesRepository:            tt.fields.currenciesRepository(),
+				currencyConversionService:       tt.fields.currencyConversionService(),
+				currencyExchangeRatesCache:      tt.fields.currencyExchangeRatesCache(),
+				currencyExchangeRatesRepository: tt.fields.currencyExchangeRatesRepository(),
+				registeredCurrenciesRepository:  tt.fields.registeredCurrenciesRepository(),
 			}
-			got, err := service.ConvertCurrency(tt.args.request)
-			s.Equal(tt.want, got)
-			s.Equal(tt.wantErr, err != nil)
+			if got, err := service.ConvertCurrency(tt.args.request); tt.wantErr {
+				s.Error(err)
+			} else {
+				s.Equal(tt.want, got)
+				s.NoError(err)
+			}
 		})
 	}
 }
