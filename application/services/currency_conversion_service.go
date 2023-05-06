@@ -5,28 +5,37 @@ import (
 
 	"convercy/application/dto"
 	"convercy/application/repositories"
-	"convercy/domain/usecases"
+	"convercy/domain"
+	"convercy/domain/aggregate"
+	"convercy/domain/entity"
+	"convercy/domain/services"
 	"convercy/domain/valueobject"
 )
 
 type CurrencyConversionService struct {
-	currencyCodeValidationService  usecases.CurrencyCodeValidationService
-	currencyConversionService      usecases.CurrencyConversionService
-	registeredCurrenciesRepository repositories.RegisteredCurrenciesRepository
-	currencyExchangeRatesService   usecases.CurrencyExchangeRatesService
+	baselineCurrencyCode            valueobject.CurrencyCode
+	currenciesRepository            repositories.CurrenciesRepository
+	currencyConversionService       *services.CurrencyConversionService
+	currencyExchangeRatesCache      repositories.CurrencyExchangeRatesCache
+	currencyExchangeRatesRepository repositories.CurrencyExchangeRatesRepository
+	registeredCurrenciesRepository  repositories.RegisteredCurrenciesRepository
 }
 
 func NewCurrencyConversionService(
-	currencyCodeValidationService usecases.CurrencyCodeValidationService,
-	currencyConversionService usecases.CurrencyConversionService,
+	baselineCurrencyCode valueobject.CurrencyCode,
+	currenciesRepository repositories.CurrenciesRepository,
+	currencyConversionService *services.CurrencyConversionService,
+	currencyExchangeRatesCache repositories.CurrencyExchangeRatesCache,
+	currencyExchangeRatesRepository repositories.CurrencyExchangeRatesRepository,
 	registeredCurrenciesRepository repositories.RegisteredCurrenciesRepository,
-	currencyExchangeRatesService usecases.CurrencyExchangeRatesService,
 ) *CurrencyConversionService {
 	return &CurrencyConversionService{
-		currencyCodeValidationService:  currencyCodeValidationService,
-		currencyConversionService:      currencyConversionService,
-		registeredCurrenciesRepository: registeredCurrenciesRepository,
-		currencyExchangeRatesService:   currencyExchangeRatesService,
+		baselineCurrencyCode:            baselineCurrencyCode,
+		currenciesRepository:            currenciesRepository,
+		currencyConversionService:       currencyConversionService,
+		currencyExchangeRatesCache:      currencyExchangeRatesCache,
+		currencyExchangeRatesRepository: currencyExchangeRatesRepository,
+		registeredCurrenciesRepository:  registeredCurrenciesRepository,
 	}
 }
 
@@ -41,8 +50,13 @@ func (s *CurrencyConversionService) ConvertCurrency(request dto.ConvertCurrencyR
 		return nil, err
 	}
 
-	if err := s.currencyCodeValidationService.ValidateCurrencyCode(code); err != nil {
+	allCurrencyCodes, err := s.currenciesRepository.ListCurrencyCodes()
+	if err != nil {
 		return nil, err
+	}
+
+	if !allCurrencyCodes.Contains(code) {
+		return nil, domain.ErrCurrencyCodeNotFound()
 	}
 
 	registeredCurrencies, err := s.registeredCurrenciesRepository.GetRegisteredCurrencies()
@@ -55,17 +69,17 @@ func (s *CurrencyConversionService) ConvertCurrency(request dto.ConvertCurrencyR
 		return nil, err
 	}
 
-	exchangeRates, err := s.currencyExchangeRatesService.ListCurrencyExchangeRates(baseCurrency)
+	currencyExchangeRates, err := s.getCurrencyExchangeRates(baseCurrency)
 	if err != nil {
 		return nil, err
 	}
 
-	response := make(dto.ConvertCurrencyResponse, len(exchangeRates))
+	response := make(dto.ConvertCurrencyResponse, len(currencyExchangeRates.ExchangeRates()))
 
-	for _, exchangeRate := range exchangeRates {
-		targetCurrencyCode := exchangeRate.Unit().TargetCurrencyCode()
+	for _, exchangeRate := range currencyExchangeRates.ExchangeRates() {
+		baselineCurrencyCode := exchangeRate.Unit().TargetCurrencyCode()
 
-		if targetCurrencyCode.Equal(code) {
+		if baselineCurrencyCode.Equal(code) {
 			continue
 		}
 
@@ -82,4 +96,64 @@ func (s *CurrencyConversionService) ConvertCurrency(request dto.ConvertCurrencyR
 	}
 
 	return response, nil
+}
+
+func (s *CurrencyConversionService) getBaselineExchangeRates() (valueobject.ExchangeRates, error) {
+	if currencyExchangeRates, err := s.currencyExchangeRatesCache.GetCurrencyExchangeRates(s.baselineCurrencyCode); err == nil {
+		return currencyExchangeRates.ExchangeRates(), nil
+	}
+
+	currencyExchangeRates, err := s.currencyExchangeRatesRepository.GetCurrencyExchangeRates(s.baselineCurrencyCode)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.currencyExchangeRatesCache.SaveCurrencyExchangeRates(currencyExchangeRates); err != nil {
+		return nil, err
+	}
+
+	return currencyExchangeRates.ExchangeRates(), nil
+}
+
+func (s *CurrencyConversionService) getCurrencyExchangeRates(currency *entity.Currency) (*aggregate.CurrencyExchangeRates, error) {
+	// Get all baseline exchange rates, which are exchange rates of all currencies in terms of the service's baseline currency code (e.g. USD)
+	baselineExchangeRates, err := s.getBaselineExchangeRates()
+	if err != nil {
+		return nil, err
+	}
+
+	// inverseCurrencyExchangeRate is the value of the baseline currency in terms of the input currency
+	inverseCurrencyExchangeRate, err := baselineExchangeRates.FindByTargetCurrencyCode(currency.Code())
+	if err != nil {
+		return nil, err
+	}
+
+	// currencyExchangeRate is the value of the input currency in terms of the baseline currency
+	currencyExchangeRate := inverseCurrencyExchangeRate.Inverse()
+
+	relativeExchangeRates := make(valueobject.ExchangeRates, 0, len(baselineExchangeRates))
+
+	for _, targetExchangeRate := range baselineExchangeRates {
+		if !currencyExchangeRate.Unit().TargetCurrencyCode().Equal(targetExchangeRate.Unit().BaseCurrencyCode()) {
+			return nil, domain.ErrIncompatibleExchangeRates()
+		}
+
+		relativeExchangeRate, err := valueobject.NewExchangeRate(
+			currencyExchangeRate.Rate().Value()*targetExchangeRate.Rate().Value(),
+			currencyExchangeRate.Unit().BaseCurrencyCode().String(),
+			targetExchangeRate.Unit().TargetCurrencyCode().String(),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		relativeExchangeRates = append(relativeExchangeRates, relativeExchangeRate)
+	}
+
+	currencyExchangeRates, err := aggregate.NewCurrencyExchangeRates(currency.Code(), relativeExchangeRates...)
+	if err != nil {
+		return nil, err
+	}
+
+	return currencyExchangeRates, nil
 }

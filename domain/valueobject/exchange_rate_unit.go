@@ -7,10 +7,20 @@ type ExchangeRateUnit struct {
 	target CurrencyCode
 }
 
-func NewExchangeRateUnit(base CurrencyCode, target CurrencyCode) (ExchangeRateUnit, error) {
+func NewExchangeRateUnit(baseCurrencyCode string, targetCurrencyCode string) (ExchangeRateUnit, error) {
+	b, err := NewCurrencyCode(baseCurrencyCode)
+	if err != nil {
+		return ExchangeRateUnit{}, err
+	}
+
+	t, err := NewCurrencyCode(targetCurrencyCode)
+	if err != nil {
+		return ExchangeRateUnit{}, err
+	}
+
 	exchangeRateUnit := ExchangeRateUnit{
-		base:   base,
-		target: target,
+		base:   b,
+		target: t,
 	}
 
 	if err := exchangeRateUnit.Validate(); err != nil {

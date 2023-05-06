@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -13,6 +14,11 @@ func init() {
 	// Database config
 	viper.SetDefault("database.kind", "mongodb")
 	viper.SetDefault("database.uri", "mongodb://database:27017")
+
+	// Cache Config
+	viper.SetDefault("cache.address", "cache:6379")
+	viper.SetDefault("cache.connection_timeout", "5s")
+	viper.SetDefault("cache.currency_exchange_rates.ttl", "24h")
 
 	// Server config
 	viper.SetDefault("server.address", ":8080")
@@ -37,6 +43,14 @@ type Config struct {
 	Database struct {
 		Kind string
 		URI  string
+	}
+
+	Cache struct {
+		Address               string
+		ConnectionTimeout     time.Duration `mapstructure:"connection_timeout"`
+		CurrencyExchangeRates struct {
+			TTL time.Duration
+		} `mapstructure:"currency_exchange_rates"`
 	}
 
 	Server struct {

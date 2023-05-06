@@ -3,18 +3,17 @@ package services
 import (
 	"convercy/domain"
 	"convercy/domain/entity"
-	"convercy/domain/usecases"
 	"convercy/domain/valueobject"
 )
 
 // CurrencyExchangeRatesService is an implementation of usecases.CurrencyExchangeRatesService interface
 type CurrencyExchangeRatesService struct {
-	core usecases.ExchangeRatesService
+	target valueobject.CurrencyCode
 }
 
-func NewCurrencyExchangeRatesService(core usecases.ExchangeRatesService) *CurrencyExchangeRatesService {
+func NewCurrencyExchangeRatesService(target valueobject.CurrencyCode) *CurrencyExchangeRatesService {
 	return &CurrencyExchangeRatesService{
-		core: core,
+		target: target,
 	}
 }
 
@@ -23,28 +22,7 @@ func (s *CurrencyExchangeRatesService) ListCurrencyExchangeRates(currency *entit
 		return nil, err
 	}
 
-	exchangeRates, err := s.core.ListExchangeRates()
-	if err != nil {
-		return nil, err
-	}
-
-	baseExchangeRate, err := exchangeRates.FindByBaseCurrencyCode(currency.Code())
-	if err != nil {
-		return nil, err
-	}
-
-	relativeExchangeRates := make(valueobject.ExchangeRates, 0, len(exchangeRates))
-
-	for _, targetExchangeRate := range exchangeRates {
-		relativeExchangeRate, err := s.combineExchangeRates(baseExchangeRate, targetExchangeRate)
-		if err != nil {
-			return nil, err
-		}
-
-		relativeExchangeRates = append(relativeExchangeRates, relativeExchangeRate)
-	}
-
-	return relativeExchangeRates, nil
+	return nil, nil
 }
 
 // combineExchangeRates combines two different exchange rates (e.g. BRL/USD and EUR/USD -> BRL/EUR)

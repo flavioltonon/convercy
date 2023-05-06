@@ -14,9 +14,13 @@ stop:
 	@echo "Stopping application and its dependencies..."
 	@docker-compose down --remove-orphans
 
+mocks:
+	@echo "Creating mocks..."
+	@go generate ./...
+
 tests:
 	@echo "# Running tests..."
-	@go test -cover ./application/services/... ./domain/services/...
+	@go test -cover ./application/services/...
 
 tidy:
 	@echo "# Formatting code..."

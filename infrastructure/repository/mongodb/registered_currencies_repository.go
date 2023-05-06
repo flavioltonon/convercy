@@ -15,23 +15,23 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type CurrenciesRepository struct {
+type RegisteredCurrenciesRepository struct {
 	mapper     *mappers.RegisteredCurrenciesMapper
 	repository *Repository
 }
 
-func NewCurrenciesRepository(mapper *mappers.RegisteredCurrenciesMapper, repository *Repository) *CurrenciesRepository {
-	return &CurrenciesRepository{
+func NewRegisteredCurrenciesRepository(mapper *mappers.RegisteredCurrenciesMapper, repository *Repository) *RegisteredCurrenciesRepository {
+	return &RegisteredCurrenciesRepository{
 		mapper:     mapper,
 		repository: repository,
 	}
 }
 
-func (r *CurrenciesRepository) collection() *mongo.Collection {
+func (r *RegisteredCurrenciesRepository) collection() *mongo.Collection {
 	return r.repository.database.Collection("currencies")
 }
 
-func (r *CurrenciesRepository) GetRegisteredCurrencies() (*aggregate.RegisteredCurrencies, error) {
+func (r *RegisteredCurrenciesRepository) GetRegisteredCurrencies() (*aggregate.RegisteredCurrencies, error) {
 	var registeredCurrencies dao.RegisteredCurrencies
 
 	ctx := context.Background()
@@ -47,7 +47,7 @@ func (r *CurrenciesRepository) GetRegisteredCurrencies() (*aggregate.RegisteredC
 	return r.mapper.ToModel(registeredCurrencies)
 }
 
-func (r *CurrenciesRepository) SaveRegisteredCurrencies(registeredCurrencies *aggregate.RegisteredCurrencies) error {
+func (r *RegisteredCurrenciesRepository) SaveRegisteredCurrencies(registeredCurrencies *aggregate.RegisteredCurrencies) error {
 	_, err := r.collection().UpdateOne(
 		context.Background(),
 		primitive.M{"_id": registeredCurrencies.ClientID()},
