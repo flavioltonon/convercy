@@ -4,19 +4,19 @@ import (
 	"errors"
 	"net/http"
 
+	"convercy/application"
 	"convercy/application/dto"
-	"convercy/application/services"
 	"convercy/domain"
 	"convercy/infrastructure/response"
 	"convercy/shared/logging"
 )
 
 type CurrencyController struct {
-	currencyRegistrationService *services.CurrencyRegistrationService
+	currencyRegistrationService *application.CurrencyRegistrationService
 	logger                      logging.Logger
 }
 
-func NewCurrencyController(currencyRegistrationService *services.CurrencyRegistrationService, logger logging.Logger) *CurrencyController {
+func NewCurrencyController(currencyRegistrationService *application.CurrencyRegistrationService, logger logging.Logger) *CurrencyController {
 	return &CurrencyController{
 		currencyRegistrationService: currencyRegistrationService,
 		logger:                      logger,

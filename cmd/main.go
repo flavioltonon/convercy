@@ -9,11 +9,12 @@ import (
 	"syscall"
 	"time"
 
+	"convercy/application"
 	"convercy/application/config"
 	"convercy/application/http/controllers/backoffice"
 	"convercy/application/http/controllers/user"
 	"convercy/application/http/middleware"
-	applicationServices "convercy/application/services"
+	
 	domainServices "convercy/domain/services"
 	"convercy/domain/valueobject"
 	"convercy/infrastructure/logging/zap"
@@ -75,7 +76,7 @@ func main() {
 		currencyMapper                       = mongodbMappers.NewCurrencyMapper()
 		registeredCurrenciesMapper           = mongodbMappers.NewRegisteredCurrenciesMapper(currencyMapper)
 		registeredCurrenciesRepository       = mongodb.NewRegisteredCurrenciesRepository(registeredCurrenciesMapper, repository)
-		currencyConversionApplicationService = applicationServices.NewCurrencyConversionService(
+		currencyConversionApplicationService = application.NewCurrencyConversionService(
 			baselineCurrencyCode,
 			currenciesRepository,
 			currencyConversionDomainService,
@@ -83,7 +84,7 @@ func main() {
 			currencyExchangeRatesRepository,
 			registeredCurrenciesRepository,
 		)
-		currencyRegistrationApplicationService = applicationServices.NewCurrencyRegistrationService(currenciesRepository, registeredCurrenciesRepository)
+		currencyRegistrationApplicationService = application.NewCurrencyRegistrationService(currenciesRepository, registeredCurrenciesRepository)
 		backofficeCurrencyController           = backoffice.NewCurrencyController(currencyRegistrationApplicationService, logger)
 		userCurrencyController                 = user.NewCurrencyController(currencyConversionApplicationService, logger)
 	)
