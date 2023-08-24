@@ -14,8 +14,7 @@ import (
 	"convercy/application/http/controllers/backoffice"
 	"convercy/application/http/controllers/user"
 	"convercy/application/http/middleware"
-	
-	domainServices "convercy/domain/services"
+	domain "convercy/domain/services"
 	"convercy/domain/valueobject"
 	"convercy/infrastructure/logging/zap"
 	"convercy/infrastructure/repository/mongodb"
@@ -72,7 +71,7 @@ func main() {
 		currencyExchangeRatesMapper          = redisMappers.NewCurrencyExchangeRatesMapper(exchangeRatesMapper)
 		currencyExchangeRatesCache           = redis.NewCurrencyExchangeRatesCache(currencyExchangeRatesMapper, cache, config.Cache.CurrencyExchangeRates.TTL)
 		currencyExchangeRatesRepository      = openexchangerates.NewCurrencyExchangeRatesRepository(openExchangeRatesClient)
-		currencyConversionDomainService      = domainServices.NewCurrencyConversionService()
+		currencyConversionDomainService      = domain.NewCurrencyConversionService()
 		currencyMapper                       = mongodbMappers.NewCurrencyMapper()
 		registeredCurrenciesMapper           = mongodbMappers.NewRegisteredCurrenciesMapper(currencyMapper)
 		registeredCurrenciesRepository       = mongodb.NewRegisteredCurrenciesRepository(registeredCurrenciesMapper, repository)
