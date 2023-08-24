@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package v1;
+
+import "google/protobuf/empty.proto";
+import "application/grpc/proto/v1/currency.proto";
+
+option go_package = "./v1";
+
+service CurrencyRegistrationService {
+    rpc RegisterCurrency(RegisterCurrencyRequest) returns (RegisterCurrencyResponse);
+    rpc UnregisterCurrency(UnregisterCurrencyRequest) returns (google.protobuf.Empty);
+    rpc ListRegisteredCurrencies(google.protobuf.Empty) returns (ListRegisteredCurrenciesResponse);
+}
+
+message RegisterCurrencyRequest {
+    string code = 1;
+}
+
+message RegisterCurrencyResponse {
+    v1.Currency value = 1;
+}
+
+message UnregisterCurrencyRequest {
+    string currency_id = 1;
+}
+
+message ListRegisteredCurrenciesResponse {
+    repeated Currency values = 1;
+}

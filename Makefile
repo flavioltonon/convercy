@@ -1,3 +1,5 @@
+PROTO_PATH=./application/grpc/proto
+
 check:
 	@echo "# Checking for suspicious, abnormal, or useless code..."
 	@go vet ./...
@@ -17,6 +19,9 @@ stop:
 mocks:
 	@echo "Creating mocks..."
 	@go generate ./...
+
+proto:
+	protoc --go_out=plugins=grpc:. --go_opt=paths=source_relative ${PROTO_PATH}/**/*.proto
 
 tests:
 	@echo "# Running tests..."
